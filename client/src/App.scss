@@ -1,0 +1,205 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+@import url("https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@100;200;300;400;500;600;700;800;900&family=Monoton&family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=Poppins:wght@100;200;300;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:wght@100..900&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Syne:wght@400..800&display=swap");
+
+@font-face {
+  font-family: SourceSansProRegular;
+  src: url(../public/assets/fonts/SourceSansProRegular.ttf);
+}
+@font-face {
+  font-family: OpenSauceSansRegular;
+  src: url(../public/assets/fonts/OpenSauceSansRegular.ttf);
+}
+// *{
+//   border: 1px solid red !important;
+// }
+.border-test {
+  border: 1px solid red;
+}
+body {
+  width: 100%;
+  overflow-x: hidden;
+  font-family: SourceSansProRegular;
+}
+.custom-width-15 {
+  width: 15%;
+}
+.custom-width-45 {
+  width: 45%;
+}
+.custom-width-55 {
+  width: 55%;
+}
+.button-rounded {
+  display: inline-flex;
+  padding: 10.3px 20.6px;
+  justify-content: center;
+  align-items: center;
+  gap: 6.867px;
+  border-radius: 84.975px;
+  background: #700619;
+  color: var(--Neutral-White, #fff);
+  font-family: OpenSauceSansRegular;
+  font-size: 13.733px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20.6px;
+  letter-spacing: -0.275px;
+}
+.button-rounded-large {
+  width: 179px;
+  height: 66px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: #700619;
+  color: #fff;
+  font-family: OpenSauceSansRegular;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 145%;
+  @media (max-width: 867px) {
+    width: 130px;
+    height: 49px;
+    flex-shrink: 0;
+    font-size: 18px;
+  }
+}
+
+.hospitals-card {
+  width: 48%;
+  padding: 1.5vw 1.5vw 2vw 1.5vw;
+  border-radius: 25px;
+  background: #ffedf0;
+  gap: 2vw;
+  display: flex;
+  @media (max-width: 867px) {
+    width: 100%;
+    padding: 3.5vw 3.75vw 3.5vw 3.75vw;
+    flex-direction: column;
+  }
+  .hospitals-card-title {
+    color: #161616;
+    font-family: "Poppins", sans-serif;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: -0.96px;
+  }
+  .hospitals-card-text {
+    color: #161616;
+    font-family: "Poppins", sans-serif;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+  }
+  .hospitals-card-chip {
+    background: #700619;
+    color: white;
+    margin: 0 5px;
+    padding: 5px 7px;
+    border-radius: 20px;
+    color: #fff;
+    font-family: "Poppins", sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: -0.56px;
+  }
+  .hospitals-card-button {
+    border-radius: 10px;
+    background: #700619;
+    color: #ffe0e0;
+    font-family: "Poppins", sans-serif;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    padding: 10px 35px;
+    width: fit-content;
+  }
+}
+
+.blog-card {
+  width: 32%;
+  padding: 1% 1.5%;
+  min-height: 500px;
+  border-radius: 25px;
+  background: #ffedf0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  // justify-content: space-evenly;
+  @media (max-width: 867px) {
+    width: 100%;
+    padding: 5% 4% 5% 4%;
+    min-height: 475px;
+  }
+  .blog-card-title {
+    color: #700619;
+    font-feature-settings: "clig" off, "liga" off;
+    font-family: SourceSansProRegular;
+    font-size: 25.456px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 36.062px; /* 141.667% */
+  }
+  .blog-card-description {
+    color: #0c0c0c;
+    font-feature-settings: "clig" off, "liga" off;
+    font-family: SourceSansProRegular;
+    font-size: 19.092px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 31.82px; /* 166.667% */
+  }
+}
+
+.PrivacyPolicy{
+  .PrivacyPolicy-title{
+    color: #161616;
+    font-family: "Poppins", sans-serif;
+    font-size: 60px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 80px;
+    letter-spacing: -2.4px;
+    text-align: center;
+    margin-bottom: 25px;
+    @media (max-width: 867px) {
+      font-size: 35px;
+    }
+  }
+  .PrivacyPolicy-subheading{
+    color: #700619;
+    font-family: "Poppins", sans-serif;
+    font-size: 35px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 80px;
+    letter-spacing: -2.4px;
+    margin-top: 30px;
+    @media (max-width: 867px) {
+      font-size: 25px;
+    }
+  }
+  .PrivacyPolicy-description {
+    color: #383942;
+    font-family: SourceSansProRegular;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 41px; /* 170.833% */
+    letter-spacing: -0.48px;
+    ul{
+      list-style-type: decimal;
+      margin-left: 2vw;
+    }
+    @media (max-width: 867px) {
+      font-size: 20px;
+    }
+  }
+}

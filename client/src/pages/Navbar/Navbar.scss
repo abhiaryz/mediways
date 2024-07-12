@@ -1,0 +1,24 @@
+@font-face {
+  font-family: SourceSansProRegular;
+  src: url(../../../public/assets/fonts/SourceSansProRegular.ttf);
+}
+
+#navbar {
+  .navbar-logo {
+    width: 99px;
+    height: 60px;
+    flex-shrink: 0;
+  }
+  .navbar-pc-menu li,
+  .navbar-phone-sidemenu li {
+    font-family: SourceSansProRegular;
+    font-size: 20px;
+    font-style: normal;
+    line-height: normal;
+  }
+  .navbar-phone-sidemenu {
+    width: 70vw;
+    padding: 10vh 0;
+    height: 100vh;
+  }
+}

@@ -1,0 +1,315 @@
+@font-face {
+  font-family: SourceSansProRegular;
+  src: url(../../../public/assets/fonts/SourceSansProRegular.ttf);
+}
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Syne:wght@400..800&display=swap");
+
+#hero {
+  height: 95vh;
+  @media (max-width: 867px) {
+    margin-top: 18vh;
+    height: auto;
+  }
+  .hero-left-heading {
+    color: #000;
+    font-family: SourceSansProRegular;
+    font-size: 60px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    @media (max-width: 867px) {
+      font-size: 38px;
+    }
+  }
+  .hero-left-description {
+    color: #787878;
+    font-family: SourceSansProRegular;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 145%; /* 34.8px */
+    @media (max-width: 867px) {
+      font-size: 18px;
+      text-align: center;
+    }
+  }
+}
+#numbers {
+  background: #700619;
+  .numbers-title {
+    color: #fff;
+    font-family: SourceSansProRegular;
+    font-size: 60px;
+    font-style: normal;
+    font-weight: 600;
+    text-align: center;
+    line-height: normal;
+    width: 95%;
+    @media (max-width: 867px) {
+      font-size: 40px;
+      text-align: center;
+    }
+  }
+  .numbers-description {
+    color: rgba(255, 255, 255, 0.8);
+    font-family: SourceSansProRegular;
+    font-size: 24px;
+    font-style: normal;
+    text-align: center;
+    font-weight: 400;
+    line-height: 145%;
+    width: 95%;
+  }
+  .numbers-div-title {
+    color: #fff;
+    font-family: SourceSansProRegular;
+    font-size: 53.333px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    @media (max-width: 867px) {
+      font-size: 45px;
+      text-align: center;
+    }
+  }
+  .numbers-div-description {
+    color: #fff;
+    text-align: center;
+    font-family: SourceSansProRegular;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 145%; /* 23.2px */
+    @media (max-width: 867px) {
+      font-size: 14px;
+    }
+  }
+}
+#Home-services {
+  .services-title {
+    color: #000;
+    font-family: SourceSansProRegular;
+    font-size: 60px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    @media (max-width: 867px) {
+      font-size: 40px;
+      text-align: center;
+    }
+  }
+  .services-description {
+    color: #787878;
+    font-family: SourceSansProRegular;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 145%;
+    text-align: center;
+    @media (max-width: 867px) {
+      font-size: 18px;
+      text-align: center;
+    }
+  }
+  .services-card {
+    width: 30%;
+    padding: 1.5%;
+    height: 536.692px;
+    border-radius: 25px;
+    background: #ffedf0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    @media (max-width: 867px) {
+      width: 100%;
+      padding: 1% 4% 5% 4%;
+      height: 500px;
+    }
+  }
+  .services-card-title {
+    color: #700619;
+    font-feature-settings: "clig" off, "liga" off;
+    font-family: SourceSansProRegular;
+    font-size: 25.456px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 36.062px; /* 141.667% */
+  }
+  .services-card-description {
+    color: #0c0c0c;
+    font-feature-settings: "clig" off, "liga" off;
+    font-family: SourceSansProRegular;
+    font-size: 19.092px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 31.82px; /* 166.667% */
+  }
+  .services-card-link {
+    color: #700619;
+    text-align: center;
+    font-feature-settings: "clig" off, "liga" off;
+    font-family: "DM Sans", sans-serif;
+    font-size: 19.092px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 19.092px; /* 100% */
+  }
+}
+
+#Home-Specialities {
+  width: 100vw;
+  .Specialities-title {
+    color: #e9f7f8;
+    font-family: SourceSansProRegular;
+    font-size: 60px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    @media (max-width: 867px) {
+      font-size: 35px;
+      text-align: center;
+    }
+  }
+  .Specialities-description {
+    color: rgba(255, 255, 255, 0.8);
+    font-family: SourceSansProRegular;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 145%; /* 34.8px */
+    @media (max-width: 867px) {
+      font-size: 18px;
+      text-align: center;
+    }
+  }
+  .Home-Specialities-card {
+    width: 22%;
+    padding: 20px 25px 40px 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    gap: 20px;
+    min-height: 350px; /* Set a minimum height to ensure consistency */
+    box-sizing: border-box;
+    border-radius: 4.151px;
+    border: 0.83px solid rgba(233, 247, 248, 0.5);
+    @media (max-width: 867px) {
+      width: 100%;
+    }
+  }
+  .Home-Specialities-card-title {
+    color: #e9f7f8;
+    font-family: SourceSansProRegular;
+    font-size: 19.925px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+  }
+  .Home-Specialities-card-description {
+    color: rgba(233, 247, 248, 0.85);
+    font-family: SourceSansProRegular;
+    font-size: 16.604px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+  .Home-Specialities-card-link {
+    color: #e9f7f8;
+    font-family: SourceSansProRegular;
+    font-size: 13.283px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+  }
+}
+#Tourism {
+  background: #ffedf0;
+  .tourism-title {
+    color: #000;
+    font-family: SourceSansProRegular;
+    font-size: 60px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    @media (max-width: 867px) {
+      font-size: 38px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+  }
+  .tourism-div-title {
+    color: #000;
+    font-family: SourceSansProRegular;
+    font-size: 19.925px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+  }
+  .tourism-div-description {
+    color: rgba(30, 30, 30, 0.65);
+    font-family: SourceSansProRegular;
+    font-size: 16.604px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+  .tourism-div-icon-div {
+    background-color: white;
+    border-radius: 50%;
+    // object-fit: contain !important;
+    // width: 100px;
+    // height: 100px;
+  }
+}
+#contact {
+  .contact-title {
+    color: #333;
+    text-align: center;
+    font-family: SourceSansProRegular;
+    font-size: 64px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 120%; /* 76.8px */
+  }
+  .contact-subheading {
+    color: #555;
+    text-align: center;
+    font-family: SourceSansProRegular;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%; /* 36px */
+  }
+  .contact-label {
+    color: #282938;
+    font-family: SourceSansProRegular;
+    font-size: 21.333px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%;
+  }
+  .contact-input {
+    border-radius: 8px;
+    border: 1.333px solid #700619;
+    &:focus {
+      border: 30px solid #700619;
+      color: brown;
+    }
+  }
+  .contact-submit {
+    display: flex;
+    height: 70px;
+    padding: 19px 156px 19px 156px;
+    align-items: center;
+    border-radius: 8px;
+    background: #700619;
+    color: white;
+    font-family: SourceSansProRegular;
+    text-align: center;
+    font-size: 21.333px;
+    font-style: normal;
+    justify-content: center;
+    font-weight: 600;
+    line-height: 150%; /* 32px */
+  }
+}

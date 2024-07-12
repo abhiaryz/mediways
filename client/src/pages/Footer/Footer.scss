@@ -1,0 +1,86 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Syne:wght@400..800&display=swap");
+.slick-slide {
+  display: flex !important;
+  justify-content: center !important; /* Center horizontally */
+}
+
+#footer {
+  background-image: url("../../../public/assets/images/footerdesign.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  .footer-logos {
+    width: 230px !important;
+    height: 230px !important;
+    object-fit: contain;
+    margin: 0 30px;
+    @media (max-width: 867px) {
+      margin: auto !important;
+    }
+  }
+  .footer-div1-description {
+    color: rgba(0, 0, 0, 0.54);
+    font-family: Roboto;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 19.925px; /* 150% */
+  }
+  .footer-divset-title {
+    color: #700619;
+    font-family: Lato;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 900;
+    line-height: normal;
+    text-transform: uppercase;
+  }
+  .footer-divset-options {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    color: rgba(0, 0, 0, 0.54);
+    font-family: Lato;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 16.604px; /* 125% */
+  }
+  .footer-social-div {
+    border-radius: 22.444px;
+    border: 0.468px solid #700619;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(1.870303750038147px);
+    width: 45px;
+    height: 45px;
+    padding: 11.222px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .footer-enddiv {
+    border-top: 1.5px solid #700619;
+    border-left: 1.5px solid #700619;
+    border-right: 1.5px solid #700619;
+  }
+  .footer-enddiv-copyright {
+    color: #700619;
+    font-family: Lato;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 35.86px; /* 199.222% */
+    letter-spacing: -0.231px;
+  }
+  .footer-enddiv-termscondition {
+    color: #700619;
+    font-variant-numeric: stacked-fractions;
+    font-feature-settings: "cv09" on, "cv04" on, "ss01" on, "cv03" on, "ss03" on,
+      "cv06" on;
+    font-family: Lato;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 35.86px; /* 199.222% */
+    letter-spacing: -0.231px;
+  }
+}
