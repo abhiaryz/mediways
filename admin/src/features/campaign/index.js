@@ -1,124 +1,82 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import TitleCard from "../../components/Cards/TitleCard";
 import { showNotification } from "../common/headerSlice";
 import { Link } from "react-router-dom";
-
-const INITIAL_INTEGRATION_LIST = [
-  {
-    name: "Slack",
-    icon: "https://cdn-icons-png.flaticon.com/512/2111/2111615.png",
-    isActive: true,
-    description:
-      "Slack is an instant messaging program designed by Slack Technologies and owned by Salesforce.",
-  },
-  {
-    name: "Facebook",
-    icon: "https://cdn-icons-png.flaticon.com/512/124/124010.png",
-    isActive: false,
-    description:
-      "Meta Platforms, Inc., doing business as Meta and formerly named Facebook, Inc., and TheFacebook.",
-  },
-  {
-    name: "Linkedin",
-    icon: "https://cdn-icons-png.flaticon.com/512/174/174857.png",
-    isActive: true,
-    description:
-      "LinkedIn is a business and employment-focused social media platform that works through websites and mobile apps.",
-  },
-  {
-    name: "Google Ads",
-    icon: "https://cdn-icons-png.flaticon.com/512/2301/2301145.png",
-    isActive: false,
-    description:
-      "Google Ads is an online advertising platform developed by Google, where advertisers bid to display brief advertisements, service offerings",
-  },
-  {
-    name: "Gmail",
-    icon: "https://cdn-icons-png.flaticon.com/512/5968/5968534.png",
-    isActive: false,
-    description:
-      "Gmail is a free email service provided by Google. As of 2019, it had 1.5 billion active users worldwide.",
-  },
-  {
-    name: "Salesforce",
-    icon: "https://cdn-icons-png.flaticon.com/512/5968/5968880.png",
-    isActive: false,
-    description:
-      "It provides customer relationship management software and applications focused on sales, customer service, marketing automation.",
-  },
-  {
-    name: "Hubspot",
-    icon: "https://cdn-icons-png.flaticon.com/512/5968/5968872.png",
-    isActive: false,
-    description:
-      "American developer and marketer of software products for inbound marketing, sales, and customer service.",
-  },
-];
+import {
+  NotificationContainer,
+  NotificationManager,
+} from "react-notifications";
+import axios from "axios";
+import CampaignCard from "../../components/Cards/CampaignCard";
+import CreateNewCard from "../../components/Cards/CreateNewCard";
+import Title from "../../components/Typography/Title";
 
 function Campaigns() {
   const dispatch = useDispatch();
+  const token = localStorage.getItem("token");
+  const [campaigns, setcampaigns] = useState();
+  const [loading, setLoading] = useState(false);
 
-  const [integrationList, setIntegrationList] = useState(
-    INITIAL_INTEGRATION_LIST
-  );
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (token) {
+          setLoading(true);
+          const response = await axios.get(
+            `${import.meta.env.VITE_SERVER_URL}/admin/get-all-campaigns`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          setcampaigns(response.data.campaigns);
+        }
+      } catch (error) {
+        console.log(error);
 
-  const updateIntegrationStatus = (index) => {
-    let integration = integrationList[index];
-    setIntegrationList(
-      integrationList.map((i, k) => {
-        if (k === index) return { ...i, isActive: !i.isActive };
-        return i;
-      })
-    );
-    dispatch(
-      showNotification({
-        message: `${integration.name} ${
-          integration.isActive ? "disabled" : "enabled"
-        }`,
-        status: 1,
-      })
-    );
-  };
+        if (error.response && error.response.status === 401) {
+          return navigate(`/`);
+        }
+        NotificationManager.error(
+          "Failed to fetch campaigns",
+          "Error",
+          5000,
+          () => {
+            alert(error.response.data.error);
+          }
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [token]);
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Link to="/app/campaign/new">
-          <TitleCard title="Create New" topMargin={"mt-2"}>
-            <p className="flex">
-              <img
-                alt="add"
-                src="/public/assets/icons/plus.svg"
-                className="w-12 h-12 inline-block mr-4"
+      <NotificationContainer />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <CreateNewCard />
+      </div>
+      <br /> <br />
+      <br />
+      <Title children="Existing Campaigns" />
+      <br />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {campaigns &&
+          campaigns.map((i, k) => {
+            return (
+              <CampaignCard
+                key={k}
+                title={i.title}
+                url={i.thumbnailUrl}
+                link={i.id}
               />
-              Create New Campaign
-            </p>
-          </TitleCard>
-        </Link>
-
-        {integrationList.map((i, k) => {
-          return (
-            <TitleCard key={k} title={i.name} topMargin={"mt-2"}>
-              <p className="flex">
-                <img
-                  alt="icon"
-                  src={i.icon}
-                  className="w-12 h-12 inline-block mr-4"
-                />
-                {i.description}
-              </p>
-              <div className="mt-6 text-right">
-                <input
-                  type="checkbox"
-                  className="toggle toggle-success toggle-lg"
-                  checked={i.isActive}
-                  onChange={() => updateIntegrationStatus(k)}
-                />
-              </div>
-            </TitleCard>
-          );
-        })}
+            );
+          })}
       </div>
     </>
   );

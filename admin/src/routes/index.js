@@ -10,6 +10,7 @@ const Charts = lazy(() => import('../pages/protected/Charts'))
 const Leads = lazy(() => import('../pages/protected/Leads'))
 const Campaigns = lazy(() => import('../pages/protected/Campaigns'))
 const CampaignNew = lazy(() => import('../pages/protected/CampaignNew'))
+const CampaignDetail = lazy(() => import('../pages/protected/CampaignDetail'))
 const Team = lazy(() => import('../pages/protected/Team'))
 const Transactions = lazy(() => import('../pages/protected/Transactions'))
 const Bills = lazy(() => import('../pages/protected/Bills'))
@@ -51,6 +52,10 @@ const routes = [
   {
     path: '/campaign/new',
     component: CampaignNew,
+  },
+  {
+    path: `/campaigns/:link`,
+    component: CampaignDetail,
   },
   {
     path: '/charts',

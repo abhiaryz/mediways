@@ -4,8 +4,15 @@ import "react-quill/dist/quill.snow.css";
 import InputText from "../../components/Input/InputText";
 import ErrorText from "../../components/Typography/ErrorText";
 import axios from "axios";
+import {
+  NotificationContainer,
+  NotificationManager,
+} from "react-notifications";
+import { Link, useNavigate } from "react-router-dom";
 
 function CampaignNew() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     title: "",
     status: "private",
@@ -139,12 +146,24 @@ function CampaignNew() {
     e.preventDefault();
     setErrorMessage("");
 
+    if (
+      !formData.title ||
+      !formData.status ||
+      !formData.amount ||
+      !formData.beneficiaryName ||
+      !formData.thumbnail ||
+      formData.carouselImages.length === 0
+    ) {
+      setErrorMessage("All fields are required.");
+      NotificationManager.error("Error", "All fields are required.");
+      return;
+    }
+
     const formDataToSend = new FormData();
     formDataToSend.append("title", formData.title);
     formDataToSend.append("status", formData.status);
     formDataToSend.append("amount", formData.amount);
     formDataToSend.append("beneficiaryName", formData.beneficiaryName);
-    formDataToSend.append("description", formData.description);
 
     if (formData.thumbnail) {
       formDataToSend.append("thumbnail", formData.thumbnail);
@@ -152,7 +171,7 @@ function CampaignNew() {
     for (let i = 0; i < formData.carouselImages.length; i++) {
       formDataToSend.append("carouselImages", formData.carouselImages[i]);
     }
-    console.log(formData)
+
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_SERVER_URL}/admin/campaign-new`,
@@ -163,10 +182,21 @@ function CampaignNew() {
           },
         }
       );
-      
+      NotificationManager.success(
+        "Success",
+        "Created new Campaign Successfully"
+      );
+      navigate(`/app/dashboard`);
     } catch (error) {
-      console.log(error);
       setErrorMessage(error.response.data.error);
+      NotificationManager.error(
+        "Error",
+        "Failed to create new campaign",
+        5000,
+        () => {
+          alert(error.response.data.error);
+        }
+      );
     } finally {
       setLoading(false);
     }
@@ -176,6 +206,7 @@ function CampaignNew() {
   }, [formData]);
   return (
     <>
+      <NotificationContainer />
       <div className="w-full flex flex-col gap-8">
         <InputText
           type="text"

@@ -5,16 +5,17 @@ const dotenv = require("dotenv");
 
 dotenv.config({ path: path.join(__dirname, "..", "..", "api", ".env") });
 
-const uploadImgToS3 = async (key, fileBuffer, fileName) => {
+const UploadImgToS3 = async (key, fileBuffer, fileName) => {
   const command = new PutObjectCommand({
     Bucket: process.env.AWS_STORAGE_BUCKET_NAME,
     Key: key,
     Body: fileBuffer,
+    ContentType: getContentType(fileName),
   });
 
   try {
     const response = await s3.send(command);
-    console.log(response);
+    return key
   } catch (err) {
     console.error("Error uploading to S3:", err);
     throw err;
@@ -34,4 +35,4 @@ const getContentType = (fileName) => {
   }
 };
 
-module.exports = { uploadImgToS3 };
+module.exports = { UploadImgToS3 };

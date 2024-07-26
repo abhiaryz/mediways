@@ -13,6 +13,6 @@ const s3 = new S3Client({
   },
 });
 
-console.log("S3 Client created successfully:", s3.config);
+console.log("S3 Client created successfully");
 
 module.exports = s3;
