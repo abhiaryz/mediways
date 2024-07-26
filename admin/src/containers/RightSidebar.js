@@ -2,7 +2,7 @@ import XMarkIcon  from '@heroicons/react/24/solid/XMarkIcon'
 import { useDispatch, useSelector } from 'react-redux'
 import NotificationBodyRightDrawer from '../features/common/components/NotificationBodyRightDrawer'
 import { closeRightDrawer } from '../features/common/rightDrawerSlice'
-import { RIGHT_DRAWER_TYPES } from '../utils/globalConstantUtil'
+// import { RIGHT_DRAWER_TYPES } from '../utils/globalConstantUtil'
 
 function RightSidebar(){
 
@@ -37,8 +37,8 @@ function RightSidebar(){
                             {/* Loading drawer body according to different drawer type */}
                             {
                                 {
-                                        [RIGHT_DRAWER_TYPES.NOTIFICATION] : <NotificationBodyRightDrawer {...extraObject} closeRightDrawer={close}/>,
-                                        [RIGHT_DRAWER_TYPES.DEFAULT] : <div></div>
+                                        // [RIGHT_DRAWER_TYPES.NOTIFICATION] : <NotificationBodyRightDrawer {...extraObject} closeRightDrawer={close}/>,
+                                        // [RIGHT_DRAWER_TYPES.DEFAULT] : <div></div>
                                 }[bodyType]
                             }
                                 

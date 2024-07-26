@@ -5,6 +5,7 @@ function ToogleInput({labelTitle, labelStyle, type, containerStyle, defaultValue
 
     const [value, setValue] = useState(defaultValue)
 
+    
     const updateToogleValue = () => {
         setValue(!value)
         updateFormValue({updateType, value : !value})

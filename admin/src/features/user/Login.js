@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import LandingIntro from "./LandingIntro";
 import ErrorText from "../../components/Typography/ErrorText";
 import InputText from "../../components/Input/InputText";
@@ -10,7 +10,7 @@ function Login() {
     password: "",
     emailId: "",
   };
-
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [loginObj, setLoginObj] = useState(INITIAL_LOGIN_OBJ);
@@ -30,9 +30,8 @@ function Login() {
         `${import.meta.env.VITE_SERVER_URL}/admin/login`,
         loginObj
       );
-
-      localStorage.setItem("token", "DumyTokenHere");
-      window.location.href = "/app/dashboard";
+      localStorage.setItem("token", response.data.token);
+      navigate(`/app/dashboard`);
     } catch (error) {
       setErrorMessage(error.response.data.error);
     } finally {
