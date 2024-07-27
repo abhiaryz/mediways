@@ -1,9 +1,18 @@
-import React, { useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { useParams } from "react-router-dom";
+import {
+  NotificationContainer,
+  NotificationManager,
+} from "react-notifications";
+import axios from "axios";
 
 export default function FormikRichText({ id, label, value, setValue }) {
   const quillRef = useRef();
+  const { link } = useParams();
+  const token = localStorage.getItem("token");
+  const [loading, setLoading] = useState(false);
 
   const imageHandler = (e) => {
     const editor = quillRef.current.getEditor();
@@ -18,15 +27,39 @@ export default function FormikRichText({ id, label, value, setValue }) {
         console.log(file);
         const formData = new FormData();
         formData.append("image", file);
-        console.log(formData);
-        // const res = await ImageUpload(formData); // upload data into server or aws or cloudinary
-        const url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgPbd2MBbw3o5_yzYC_pPjoVNKUx7WCrMN3g&s';
-        const range = editor.getSelection();
-        editor.insertEmbed(range.index, "image", url);
-        editor.setSelection(range.index + 1);
-        editor.insertText(range.index + 1, "\n");
-      } else {
-        console.log("error");
+        setLoading(true);
+        try {
+          const response = await axios.post(
+            `${
+              import.meta.env.VITE_SERVER_URL
+            }/admin/upload-campaign-image/${link}`,
+            formData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "multipart/form-data",
+              },
+            }
+          );
+          const url = response.data.campaignImageUrl;
+          const range = editor.getSelection();
+          editor.insertEmbed(range.index, "image", url);
+          editor.setSelection(range.index + 1);
+          editor.insertText(range.index + 1, "\n");
+          NotificationManager.success("Success", "Image Uploaded Successfully");
+        } catch (error) {
+          console.log(error);
+          NotificationManager.error(
+            "Error",
+            "Failed to update campaign",
+            5000,
+            () => {
+              alert(error.response.data.error);
+            }
+          );
+        } finally {
+          setLoading(false);
+        }
       }
     };
   };
@@ -52,15 +85,17 @@ export default function FormikRichText({ id, label, value, setValue }) {
     () => ({
       toolbar: {
         container: [
-          [{ header: [1, 2, 3, 4, 5, 6, false] }],
-          ["bold", "italic", "underline", "strike"],
+          [{ size: ["small", false, "large", "huge"] }],
+          ["bold", "italic", "underline", "strike", "blockquote"],
+          [{ list: "ordered" }, { list: "bullet" }],
+          ["link", "image"],
           [
             { list: "ordered" },
             { list: "bullet" },
             { indent: "-1" },
             { indent: "+1" },
+            { align: [] },
           ],
-          ["image", "link"],
           [
             {
               color: [
@@ -99,6 +134,7 @@ export default function FormikRichText({ id, label, value, setValue }) {
                 "#003700",
                 "#002966",
                 "#3d1466",
+                "custom-color",
               ],
             },
           ],

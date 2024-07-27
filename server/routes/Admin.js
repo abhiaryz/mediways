@@ -7,6 +7,8 @@ const {
   GetAllCampaigns,
   GetCampaignDetails,
   UpdateCampaignDetails,
+  UploadCampaignImgtoS3,
+  GetCampaignImgPresignedUrl,
 } = require("../controller/Admin");
 const multer = require("multer");
 
@@ -38,6 +40,15 @@ router.put(
     { name: "carouselImages", maxCount: 5 },
   ]),
   UpdateCampaignDetails
+);
+router.post(
+  "/admin/upload-campaign-image/:link",
+  upload.fields([{ name: "image", maxCount: 1 }]),
+  UploadCampaignImgtoS3
+);
+router.post(
+  "/admin/get-campaign-img-presigned-url/:link",
+  GetCampaignImgPresignedUrl
 );
 
 module.exports = router;

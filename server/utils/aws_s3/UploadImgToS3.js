@@ -1,9 +1,10 @@
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
-const s3 = require("../../config/aws_s3"); // Update the import statement to correctly match the export
 const path = require("path");
 const dotenv = require("dotenv");
 
 dotenv.config({ path: path.join(__dirname, "..", "..", "api", ".env") });
+
+const s3 = new S3Client({ region: process.env.AWS_S3_REGION_NAME });
 
 const UploadImgToS3 = async (key, fileBuffer, fileName) => {
   const command = new PutObjectCommand({
@@ -15,7 +16,8 @@ const UploadImgToS3 = async (key, fileBuffer, fileName) => {
 
   try {
     const response = await s3.send(command);
-    return key
+    const url = `https://${process.env.AWS_STORAGE_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION_NAME}.amazonaws.com/${key}`;
+    return url;
   } catch (err) {
     console.error("Error uploading to S3:", err);
     throw err;

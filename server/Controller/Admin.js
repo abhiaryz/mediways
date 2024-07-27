@@ -83,13 +83,13 @@ exports.CampaignNew = async (req, res, next) => {
       .substring(0, 50);
 
     // Handle thumbnail upload
-    let thumbnailKey = null;
+    let thumbnailUrl = null;
     if (req.files["thumbnail"]) {
       const thumbnailFile = req.files["thumbnail"][0];
-      thumbnailKey = `${id}/thumbnail/thumbnail${path.extname(
+      const thumbnailKey = `${id}/thumbnail/thumbnail${path.extname(
         thumbnailFile.originalname
       )}`;
-      await UploadImgToS3(
+      thumbnailUrl = await UploadImgToS3(
         thumbnailKey,
         thumbnailFile.buffer,
         thumbnailFile.originalname
@@ -97,12 +97,17 @@ exports.CampaignNew = async (req, res, next) => {
     }
 
     // Handle carousel images upload
-    const carouselImageKeys = [];
+    const carouselImageUrls = [];
+    let carouselImageUrl = null;
     if (req.files["carouselImages"]) {
       for (const file of req.files["carouselImages"]) {
         const carouselImageKey = `${id}/carouselImages/${file.originalname}`;
-        await UploadImgToS3(carouselImageKey, file.buffer, file.originalname);
-        carouselImageKeys.push(carouselImageKey);
+        carouselImageUrl = await UploadImgToS3(
+          carouselImageKey,
+          file.buffer,
+          file.originalname
+        );
+        carouselImageUrls.push(carouselImageUrl);
       }
     }
 
@@ -113,8 +118,9 @@ exports.CampaignNew = async (req, res, next) => {
       beneficiaryName,
       status,
       amount,
-      thumbnail: thumbnailKey,
-      carousel: carouselImageKeys,
+      content: "",
+      thumbnail: thumbnailUrl,
+      carousel: carouselImageUrls,
       createdAt: moment().format("MMMM Do YYYY, h:mm:ss a"),
       lastUpdate: moment().format("MMMM Do YYYY, h:mm:ss a"),
     });
@@ -130,8 +136,8 @@ exports.CampaignNew = async (req, res, next) => {
         status,
         amount,
         beneficiaryName,
-        thumbnail: thumbnailKey,
-        carouselImages: carouselImageKeys,
+        thumbnail: thumbnailUrl,
+        carouselImages: carouselImageUrls,
       },
     });
   } catch (error) {
@@ -143,17 +149,10 @@ exports.CampaignNew = async (req, res, next) => {
 exports.GetAllCampaigns = async (req, res, next) => {
   try {
     const campaigns = await campaignModel.find({}, "title thumbnail id");
-    // Generate presigned URLs for the thumbnails
-    const campaignsWithUrls = await Promise.all(
-      campaigns.map(async (campaign) => {
-        const thumbnailUrl = await GetSignedUrl(campaign.thumbnail);
-        return {
-          ...campaign.toObject(),
-          thumbnailUrl,
-        };
-      })
-    );
-    res.status(200).json({ campaigns: campaignsWithUrls });
+    if (!campaigns) {
+      return res.status(404).json({ message: "Campaign not found" });
+    }
+    res.status(200).json({ campaigns });
   } catch (error) {
     console.error(error);
     res
@@ -167,20 +166,11 @@ exports.GetCampaignDetails = async (req, res, next) => {
 
   try {
     const campaign = await campaignModel.findOne({ id: link });
-
     if (!campaign) {
       return res.status(404).json({ message: "Campaign not found" });
     }
-    const signedThumbnailUrl = await GetSignedUrl(campaign.thumbnail);
-    const signedCarouselUrls = await Promise.all(
-      campaign.carousel.map(async (imageKey) => await GetSignedUrl(imageKey))
-    );
     return res.status(200).json({
-      campaignDetail: {
-        ...campaign.toObject(),
-        thumbnail: signedThumbnailUrl,
-        carousel: signedCarouselUrls,
-      },
+      campaign,
     });
   } catch (error) {
     console.error("Error fetching campaign details:", error);
@@ -190,7 +180,8 @@ exports.GetCampaignDetails = async (req, res, next) => {
 
 exports.UpdateCampaignDetails = async (req, res) => {
   const { link } = req.params;
-  const { title, status, amount, beneficiaryName, description } = req.body;
+  const { title, status, amount, beneficiaryName, content, imagesToDelete } =
+    req.body;
 
   try {
     const campaign = await campaignModel.findOne({ id: link });
@@ -198,19 +189,27 @@ exports.UpdateCampaignDetails = async (req, res) => {
     if (!campaign) {
       return res.status(404).json({ error: "Campaign not found" });
     }
+    const id = title
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w\-]+/g, "")
+      .substring(0, 50);
 
     // Update text fields
+    campaign.id = id;
     campaign.title = title;
     campaign.status = status;
     campaign.amount = amount;
     campaign.beneficiaryName = beneficiaryName;
-    campaign.description = description;
+    campaign.content = content;
 
     // Update thumbnail if present
     if (req.files.thumbnail) {
       // Delete the old thumbnail from S3
       if (campaign.thumbnail) {
-        await DeleteImgfromS3(campaign.thumbnail);
+        const oldThumbnailKey = campaign.thumbnail.split(".com/")[1];
+        await DeleteImgfromS3(oldThumbnailKey);
       }
       const thumbnail = req.files.thumbnail[0];
       const thumbnailKey = `${link}/thumbnail/thumbnail${path.extname(
@@ -228,7 +227,8 @@ exports.UpdateCampaignDetails = async (req, res) => {
     if (req.files.carouselImages) {
       // Delete old carousel images from S3
       for (const image of campaign.carousel) {
-        await DeleteImgfromS3(image);
+        const oldImageKey = image.split(".com/")[1];
+        await DeleteImgfromS3(oldImageKey);
       }
       const carouselImages = req.files.carouselImages;
       const carouselUrls = await Promise.all(
@@ -244,11 +244,62 @@ exports.UpdateCampaignDetails = async (req, res) => {
       campaign.carousel = carouselUrls;
     }
 
+    // Delete images from content
+    if (imagesToDelete) {
+      const parsedImagesToDelete = JSON.parse(imagesToDelete || "[]")
+      for (const imageUrl of parsedImagesToDelete) {
+        try {
+          const key = new URL(imageUrl).pathname.substring(1);
+          await DeleteImgfromS3(key);
+        } catch (error) {
+          console.error(`Failed to parse URL: ${imageUrl}`, error);
+        }
+      }
+    }
+
     await campaign.save();
 
     res
       .status(200)
       .json({ message: "Campaign updated successfully", campaign });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.UploadCampaignImgtoS3 = async (req, res) => {
+  const { link } = req.params;
+  try {
+    if (req.files.image) {
+      const image = req.files.image[0];
+      const campaignImageKey = `${link}/campaignImages/${image.originalname}`;
+
+      const campaignImageUrl = await UploadImgToS3(
+        campaignImageKey,
+        image.buffer,
+        image.originalname
+      );
+      res
+        .status(200)
+        .json({ message: "Image uploaded successfully", campaignImageUrl });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.GetCampaignImgPresignedUrl = async (req, res) => {
+  const { link } = req.params;
+  const { key } = req.body;
+  try {
+    if (key) {
+      const signedImageUrl = await GetSignedUrl(key);
+      res
+        .status(200)
+        .json({ message: "Image uploaded successfully", url: signedImageUrl });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });

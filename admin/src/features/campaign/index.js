@@ -72,7 +72,7 @@ function Campaigns() {
               <CampaignCard
                 key={k}
                 title={i.title}
-                url={i.thumbnailUrl}
+                url={i.thumbnail}
                 link={i.id}
               />
             );
