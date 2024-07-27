@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
+  base: './',
   //added global:window to fix draft-js issue. Error solved: "global not defined"
   // define: {
   //   global: "window",
