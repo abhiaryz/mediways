@@ -1,22 +1,30 @@
 const express = require("express");
 const router = express.Router();
 const requireAuth = require("../middleware/Admin");
+
+const { AdminLogin } = require("../Controller/Admin/User");
 const {
-  AdminLogin,
   CampaignNew,
   GetAllCampaigns,
   GetCampaignDetails,
   UpdateCampaignDetails,
   UploadCampaignImgtoS3,
   GetCampaignImgPresignedUrl,
-} = require("../controller/Admin");
-const multer = require("multer");
+} = require("../Controller/Admin/Campaign");
+
+const {
+  SpecialityNew,
+  GetAllSpecialities,
+  GetSpecialityDetails,
+  UpdateSpecialityDetails,
+  UploadSpecialityImgtoS3,
+} = require("../Controller/Admin/Speciality");
 
 // Configure multer for memory storage
+const multer = require("multer");
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Define routes
 router.route("/admin/login").post(AdminLogin);
 
 router.post(
@@ -25,13 +33,10 @@ router.post(
     { name: "thumbnail", maxCount: 1 },
     { name: "carouselImages", maxCount: 5 },
   ]),
-  requireAuth,
   CampaignNew
 );
-router.route("/admin/get-all-campaigns").get(requireAuth, GetAllCampaigns);
-router
-  .route("/admin/get-campaign-details/:link")
-  .get(requireAuth, GetCampaignDetails);
+router.route("/admin/get-all-campaigns").get(GetAllCampaigns);
+router.route("/admin/get-campaign-details/:link").get(GetCampaignDetails);
 
 router.put(
   "/admin/update-campaign-details/:link",
@@ -46,9 +51,34 @@ router.post(
   upload.fields([{ name: "image", maxCount: 1 }]),
   UploadCampaignImgtoS3
 );
+// router.post(
+//   "/admin/get-campaign-img-presigned-url/:link",
+//   GetCampaignImgPresignedUrl
+// );
+
 router.post(
-  "/admin/get-campaign-img-presigned-url/:link",
-  GetCampaignImgPresignedUrl
+  "/admin/speciality-new",
+  upload.fields([
+    { name: "icon", maxCount: 1 },
+    { name: "wallpaperimg", maxCount: 1 },
+  ]),
+  SpecialityNew
+);
+router.route("/admin/get-all-specialties").get(GetAllSpecialities);
+router.route("/admin/get-speciality-details/:link").get(GetSpecialityDetails);
+
+router.put(
+  "/admin/update-speciality-details/:link",
+  upload.fields([
+    { name: "icon", maxCount: 1 },
+    { name: "wallpaperimg", maxCount: 1 },
+  ]),
+  UpdateSpecialityDetails
+);
+router.post(
+  "/admin/upload-speciality-image/:link",
+  upload.fields([{ name: "image", maxCount: 1 }]),
+  UploadSpecialityImgtoS3
 );
 
 module.exports = router;

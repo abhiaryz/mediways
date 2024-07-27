@@ -10,9 +10,9 @@ import {
 } from "react-notifications";
 import { Link, useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
-import FormikRichText from "../../components/RichText/CampaignRichText";
+import SpecialityRichText from "../../components/RichText/SpecialityRichText";
 
-function CampaignDetail() {
+function SpecialityDetail() {
   const navigate = useNavigate();
   const { link } = useParams();
   const token = localStorage.getItem("token");
@@ -22,14 +22,11 @@ function CampaignDetail() {
   const [errorMessage, setErrorMessage] = useState("");
   const [formData, setFormData] = useState({
     title: "",
-    status: "",
-    amount: 0,
-    beneficiaryName: "",
-    content: "",
-    thumbnail: "",
-    thumbnailPreview: "",
-    carouselImages: [],
-    carouselPreviews: [],
+    desc: "",
+    icon: null,
+    iconPreview: "",
+    wallpaperimg: null,
+    wallpaperimgPreview: "",
   });
 
   const extractImageUrls = (content) => {
@@ -50,25 +47,24 @@ function CampaignDetail() {
         const response = await axios.get(
           `${
             import.meta.env.VITE_SERVER_URL
-          }/admin/get-campaign-details/${link}`,
+          }/admin/get-speciality-details/${link}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
-        const campaign = response.data.campaign;
+        const speciality = response.data.speciality;
+        console.log(response.data.speciality)
         setFormData((prevFormData) => ({
           ...prevFormData,
-          title: campaign.title,
-          status: campaign.status,
-          amount: campaign.amount,
-          beneficiaryName: campaign.beneficiaryName,
-          content: campaign.content,
-          thumbnailPreview: campaign.thumbnail,
-          carouselPreviews: campaign.carousel,
+          title: speciality.title,
+          desc: speciality.desc,
+          content: speciality.content,
+          iconPreview: speciality.icon,
+          wallpaperimgPreview: speciality.wallpaperimg,
         }));
-        const initialImages = extractImageUrls(campaign.content);
+        const initialImages = extractImageUrls(speciality.content);
         setInitialImages(initialImages);
       }
     } catch (error) {
@@ -77,7 +73,7 @@ function CampaignDetail() {
         return navigate(`/`);
       }
       NotificationManager.error(
-        "Failed to fetch campaigns",
+        "Failed to fetch Specialities",
         "Error",
         5000,
         () => {
@@ -97,53 +93,22 @@ function CampaignDetail() {
     setFormData({ ...formData, [updateType]: value });
   };
 
-  const updateToggleValue = () => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      status: prevFormData.status === "private" ? "public" : "private",
-    }));
-  };
-
-  const handleAmountChange = (value) => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      amount: value,
-    }));
-  };
-
-  const handleThumbnailChange = (event) => {
+  const handleIconChange = (event) => {
     const file = event.target.files[0];
     setFormData((prevFormData) => ({
       ...prevFormData,
-      thumbnail: file,
-      thumbnailPreview: URL.createObjectURL(file),
+      icon: file,
+      iconPreview: URL.createObjectURL(file),
     }));
   };
 
-  const handleCarouselImagesChange = (event) => {
-    const files = Array.from(event.target.files);
-    const carouselPreviews = files.map((file) => URL.createObjectURL(file));
+  const handleWallPaperImgChange = (event) => {
+    const file = event.target.files[0];
     setFormData((prevFormData) => ({
       ...prevFormData,
-      carouselImages: [...prevFormData.carouselImages, ...files],
-      carouselPreviews: [...prevFormData.carouselPreviews, ...carouselPreviews],
+      wallpaperimg: file,
+      wallpaperimgPreview: URL.createObjectURL(file),
     }));
-  };
-
-  const removeCarouselImage = (index) => {
-    setFormData((prevFormData) => {
-      const newCarouselImages = prevFormData.carouselImages.filter(
-        (image, i) => i !== index
-      );
-      const newCarouselPreviews = prevFormData.carouselPreviews.filter(
-        (preview, i) => i !== index
-      );
-      return {
-        ...prevFormData,
-        carouselImages: newCarouselImages,
-        carouselPreviews: newCarouselPreviews,
-      };
-    });
   };
 
   const handleSubmit = async (e) => {
@@ -152,11 +117,9 @@ function CampaignDetail() {
 
     if (
       !formData.title ||
-      !formData.status ||
-      !formData.amount ||
-      !formData.beneficiaryName ||
-      !formData.thumbnailPreview ||
-      formData.carouselPreviews.length === 0
+      !formData.desc ||
+      !formData.iconPreview ||
+      !formData.wallpaperimgPreview
     ) {
       setErrorMessage("All fields are required.");
       NotificationManager.error("Error", "All fields are required.");
@@ -169,16 +132,15 @@ function CampaignDetail() {
 
     const formDataToSend = new FormData();
     formDataToSend.append("title", formData.title);
-    formDataToSend.append("status", formData.status);
-    formDataToSend.append("amount", formData.amount);
-    formDataToSend.append("beneficiaryName", formData.beneficiaryName);
+    formDataToSend.append("desc", formData.desc);
     formDataToSend.append("content", formData.content);
 
-    if (formData.thumbnail) {
-      formDataToSend.append("thumbnail", formData.thumbnail);
+    if (formData.icon) {
+      formDataToSend.append("icon", formData.icon);
     }
-    for (let i = 0; i < formData.carouselImages.length; i++) {
-      formDataToSend.append("carouselImages", formData.carouselImages[i]);
+
+    if (formData.wallpaperimg) {
+      formDataToSend.append("wallpaperimg", formData.wallpaperimg);
     }
     if (imagesToDelete) {
       formDataToSend.append("imagesToDelete", JSON.stringify(imagesToDelete));
@@ -187,7 +149,7 @@ function CampaignDetail() {
       const response = await axios.put(
         `${
           import.meta.env.VITE_SERVER_URL
-        }/admin/update-campaign-details/${link}`,
+        }/admin/update-speciality-details/${link}`,
         formDataToSend,
         {
           headers: {
@@ -196,13 +158,13 @@ function CampaignDetail() {
           },
         }
       );
-      NotificationManager.success("Success", "Campaign Updated Successfully");
+      NotificationManager.success("Success", "Speciality Updated Successfully");
       fetchData();
     } catch (error) {
       setErrorMessage(error.response.data.error);
       NotificationManager.error(
         "Error",
-        "Failed to update campaign",
+        "Failed to update Speciality",
         5000,
         () => {
           alert(error.response.data.error);
@@ -223,98 +185,60 @@ function CampaignDetail() {
             defaultValue={formData.title}
             updateType="title"
             containerStyle="mt-4"
-            labelTitle="Enter Campaign Title"
+            labelTitle="Enter Speciality Title"
             updateFormValue={handleFormData}
           />
 
           <InputText
             type="text"
-            defaultValue={formData.beneficiaryName}
-            updateType="beneficiaryName"
-            labelTitle="Enter Beneficiary Name"
+            defaultValue={formData.desc}
+            updateType="desc"
+            labelTitle="Enter Description"
             updateFormValue={handleFormData}
           />
-          <label className="label cursor-pointer flex justify-start gap-4 w-fit">
-            <span className="label-text text-base-content">
-              Status: {formData.status}
-            </span>
-            <input
-              type="checkbox"
-              className="toggle"
-              checked={formData.status === "public"}
-              onChange={updateToggleValue}
-            />
-          </label>
-          <input
-            type="number"
-            value={formData.amount}
-            placeholder="Enter Campaign Amount"
-            onChange={(e) => handleAmountChange(e.target.value)}
-            className="input input-bordered w-full"
-            style={{
-              // Chrome, Safari, Edge, Opera
-              appearance: "textfield",
-              // Firefox
-              MozAppearance: "textfield",
-              // Internet Explorer 10+
-              MsAppearance: "textfield",
-            }}
-          />
+
           <div className="form-control flex flex-col gap-2">
             <label className="label">
-              <span className="label-text">Upload Thumbnail Image</span>
+              <span className="label-text">Upload Icon</span>
             </label>{" "}
             <input
               type="file"
-              accept="image/*"
-              onChange={handleThumbnailChange}
+              accept="image/*,image/svg+xml"
+              onChange={handleIconChange}
               className="input input-bordered w-full"
             />{" "}
-            {formData.thumbnailPreview && (
+            {formData.iconPreview && (
               <div>
                 <img
-                  src={formData.thumbnailPreview}
-                  alt="Thumbnail Preview"
+                  src={formData.iconPreview}
+                  alt="Icon Preview"
+                  className="w-1/5 h-auto mt-4"
+                />
+              </div>
+            )}
+          </div>
+          <div className="form-control flex flex-col gap-2">
+            <label className="label">
+              <span className="label-text">Upload Wall Paper Image</span>
+            </label>{" "}
+            <input
+              type="file"
+              accept="image/*,image/svg+xml"
+              onChange={handleWallPaperImgChange}
+              className="input input-bordered w-full"
+            />{" "}
+            {formData.wallpaperimgPreview && (
+              <div>
+                <img
+                  src={formData.wallpaperimgPreview}
+                  alt="WallPaper Preview"
                   className="w-1/5 h-auto mt-4"
                 />
               </div>
             )}
           </div>
 
-          <div className="form-control flex flex-col gap-2">
-            <label className="label">
-              <span className="label-text">Upload Carousel Images (1-5)</span>
-            </label>{" "}
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleCarouselImagesChange}
-              className="input input-bordered w-full"
-            />
-            {formData.carouselPreviews &&
-              formData.carouselPreviews.length > 0 && (
-                <div className="w-full mt-4 flex flex-wrap gap-2">
-                  {formData.carouselPreviews.map((preview, index) => (
-                    <div key={index} className="relative flex w-1/3">
-                      <img
-                        src={preview}
-                        alt={`Carousel Preview ${index + 1}`}
-                        className="border w-full h-auto"
-                      />
-                      <button
-                        className="absolute top-0 right-0 bg-red-600 text-white rounded-full p-1"
-                        onClick={() => removeCarouselImage(index)}
-                      >
-                        X
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-          </div>
-
-          <FormikRichText
+          <SpecialityRichText
             id="description"
             name="description"
             label="Description"
@@ -343,4 +267,4 @@ function CampaignDetail() {
   );
 }
 
-export default CampaignDetail;
+export default SpecialityDetail;

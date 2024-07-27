@@ -1,6 +1,6 @@
-const adminModel = require("../Model/Admin");
-const campaignModel = require("../Model/Campaign");
-const specialityModel = require("../Model/Speciality");
+const adminModel = require("../../Model/Admin");
+const campaignModel = require("../../Model/Campaign");
+const specialityModel = require("../../Model/Speciality");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -10,67 +10,25 @@ const validator = require("validator");
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
 const moment = require("moment");
-const { AlertEmail } = require("../utils/mail/AlertEmail");
-const { ErrorEmail } = require("../utils/mail/ErrorEmail");
-const { UploadImgToS3 } = require("../utils/aws_s3/UploadImgToS3");
-const { DeleteImgfromS3 } = require("../utils/aws_s3/DeleteImgfromS3");
-const { GetSignedUrl } = require("../utils/aws_s3/GetSignedUrl");
+const { AlertEmail } = require("../../utils/mail/AlertEmail");
+const { ErrorEmail } = require("../../utils/mail/ErrorEmail");
+const { UploadImgToS3 } = require("../../utils/aws_s3/UploadImgToS3");
+const { DeleteImgfromS3 } = require("../../utils/aws_s3/DeleteImgfromS3");
+const { GetSignedUrl } = require("../../utils/aws_s3/GetSignedUrl");
 const { v4: uuidv4 } = require("uuid");
 const dotenv = require("dotenv");
 const process = require("process");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
-const s3 = require("../config/aws_s3");
+const s3 = require("../../config/aws_s3");
 
-dotenv.config({ path: path.join(__dirname, "..", "api", ".env") });
+dotenv.config({ path: path.join(__dirname, "..", "..", "api", ".env") });
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
-
-exports.AdminLogin = async (req, res, next) => {
-  const { emailId, password } = req.body;
-
-  try {
-    if (!validator.isEmail(emailId)) {
-      return res.status(400).json({
-        error: "enter a valid email",
-      });
-    }
-    const admin = await adminModel.findOne({ email: emailId });
-
-    if (!admin) {
-      return res.status(401).json({
-        error: "wrong email or password",
-      });
-    }
-
-    const match = await bcrypt.compare(password, admin.password);
-    if (!match) {
-      // AlertEmail(emailId, "Login to Admin Panel with wrong credentials");
-      return res.status(400).json({
-        error: "wrong email or password",
-      });
-    }
-
-    const token = jwt.sign(
-      { userId: admin._id, email: admin.email },
-      process.env.ADMINJWTSECRET
-    );
-
-    res.status(200).json({
-      email: admin.email,
-      token: token,
-    });
-  } catch (error) {
-    // ErrorEmail(emailId, "Login as Admin");
-    res.status(500).json({
-      error: "Internal server error",
-    });
-  }
-};
 
 exports.CampaignNew = async (req, res, next) => {
   try {
@@ -87,7 +45,7 @@ exports.CampaignNew = async (req, res, next) => {
     let thumbnailUrl = null;
     if (req.files["thumbnail"]) {
       const thumbnailFile = req.files["thumbnail"][0];
-      const thumbnailKey = `${id}/thumbnail/thumbnail${path.extname(
+      const thumbnailKey = `campaigns/${id}/thumbnail/thumbnail${path.extname(
         thumbnailFile.originalname
       )}`;
       thumbnailUrl = await UploadImgToS3(
@@ -102,7 +60,7 @@ exports.CampaignNew = async (req, res, next) => {
     let carouselImageUrl = null;
     if (req.files["carouselImages"]) {
       for (const file of req.files["carouselImages"]) {
-        const carouselImageKey = `${id}/carouselImages/${file.originalname}`;
+        const carouselImageKey = `campaigns/${id}/carouselImages/${file.originalname}`;
         carouselImageUrl = await UploadImgToS3(
           carouselImageKey,
           file.buffer,
@@ -150,9 +108,7 @@ exports.CampaignNew = async (req, res, next) => {
 exports.GetAllCampaigns = async (req, res, next) => {
   try {
     const campaigns = await campaignModel.find({}, "title thumbnail id");
-    if (!campaigns) {
-      return res.status(404).json({ message: "Campaign not found" });
-    }
+
     res.status(200).json({ campaigns });
   } catch (error) {
     console.error(error);
@@ -213,7 +169,7 @@ exports.UpdateCampaignDetails = async (req, res) => {
         await DeleteImgfromS3(oldThumbnailKey);
       }
       const thumbnail = req.files.thumbnail[0];
-      const thumbnailKey = `${link}/thumbnail/thumbnail${path.extname(
+      const thumbnailKey = `campaigns/${link}/thumbnail/thumbnail${path.extname(
         thumbnail.originalname
       )}`;
       const thumbnailUrl = await UploadImgToS3(
@@ -234,7 +190,7 @@ exports.UpdateCampaignDetails = async (req, res) => {
       const carouselImages = req.files.carouselImages;
       const carouselUrls = await Promise.all(
         carouselImages.map((item) => {
-          const carouselImageKey = `${link}/carouselImages/${item.originalname}`;
+          const carouselImageKey = `campaigns/${link}/carouselImages/${item.originalname}`;
           return UploadImgToS3(
             carouselImageKey,
             item.buffer,
@@ -247,7 +203,7 @@ exports.UpdateCampaignDetails = async (req, res) => {
 
     // Delete images from content
     if (imagesToDelete) {
-      const parsedImagesToDelete = JSON.parse(imagesToDelete || "[]")
+      const parsedImagesToDelete = JSON.parse(imagesToDelete || "[]");
       for (const imageUrl of parsedImagesToDelete) {
         try {
           const key = new URL(imageUrl).pathname.substring(1);
@@ -274,7 +230,7 @@ exports.UploadCampaignImgtoS3 = async (req, res) => {
   try {
     if (req.files.image) {
       const image = req.files.image[0];
-      const campaignImageKey = `${link}/campaignImages/${image.originalname}`;
+      const campaignImageKey = `campaigns/${link}/campaignImages/${image.originalname}`;
 
       const campaignImageUrl = await UploadImgToS3(
         campaignImageKey,

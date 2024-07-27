@@ -8,7 +8,7 @@ import {
 } from "react-notifications";
 import axios from "axios";
 
-export default function FormikRichText({ id, label, value, setValue }) {
+export default function SpecialityRichText({ id, label, value, setValue }) {
   const quillRef = useRef();
   const { link } = useParams();
   const token = localStorage.getItem("token");
@@ -32,7 +32,7 @@ export default function FormikRichText({ id, label, value, setValue }) {
           const response = await axios.post(
             `${
               import.meta.env.VITE_SERVER_URL
-            }/admin/upload-campaign-image/${link}`,
+            }/admin/upload-speciality-image/${link}`,
             formData,
             {
               headers: {
@@ -41,7 +41,7 @@ export default function FormikRichText({ id, label, value, setValue }) {
               },
             }
           );
-          const url = response.data.campaignImageUrl;
+          const url = response.data.specialityImageUrl;
           const range = editor.getSelection();
           editor.insertEmbed(range.index, "image", url);
           editor.setSelection(range.index + 1);

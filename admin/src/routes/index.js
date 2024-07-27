@@ -1,56 +1,57 @@
 // All components mapping with path for internal routes
 
-import { lazy } from 'react'
+import { lazy } from "react";
 
-const Dashboard = lazy(() => import('../pages/protected/Dashboard'))
-const Welcome = lazy(() => import('../pages/protected/Welcome'))
-const Page404 = lazy(() => import('../pages/protected/404'))
-const Blank = lazy(() => import('../pages/protected/Blank'))
-const Charts = lazy(() => import('../pages/protected/Charts'))
-const Leads = lazy(() => import('../pages/protected/Leads'))
-const Campaigns = lazy(() => import('../pages/protected/Campaigns'))
-const CampaignNew = lazy(() => import('../pages/protected/CampaignNew'))
-const CampaignDetail = lazy(() => import('../pages/protected/CampaignDetail'))
-const Team = lazy(() => import('../pages/protected/Team'))
-const Transactions = lazy(() => import('../pages/protected/Transactions'))
-const Bills = lazy(() => import('../pages/protected/Bills'))
-const ProfileSettings = lazy(() => import('../pages/protected/ProfileSettings'))
+const Dashboard = lazy(() => import("../pages/protected/Dashboard"));
+const Page404 = lazy(() => import("../pages/protected/404"));
+const Blank = lazy(() => import("../pages/protected/Blank"));
+const Specialities = lazy(() => import("../pages/protected/Specialities"));
+const SpecialitiesNew = lazy(() => import("../pages/protected/SpecialitiesNew"));
+const SpecialityDetail = lazy(() => import("../pages/protected/SpecialityDetail"));
+const Campaigns = lazy(() => import("../pages/protected/Campaigns"));
+const CampaignNew = lazy(() => import("../pages/protected/CampaignNew"));
+const CampaignDetail = lazy(() => import("../pages/protected/CampaignDetail"));
+const Team = lazy(() => import("../pages/protected/Team"));
+const Bills = lazy(() => import("../pages/protected/Bills"));
+const ProfileSettings = lazy(() =>
+  import("../pages/protected/ProfileSettings")
+);
 
 const routes = [
   {
-    path: '/dashboard', // the url
+    path: "/dashboard", // the url
     component: Dashboard, // view rendered
   },
   {
-    path: '/welcome', // the url
-    component: Welcome, // view rendered
+    path: "/specialities",
+    component: Specialities,
   },
   {
-    path: '/leads',
-    component: Leads,
+    path: "/specialities/new",
+    component: SpecialitiesNew,
   },
   {
-    path: '/settings-team',
+    path: `/specialities/:link`,
+    component: SpecialityDetail,
+  },
+  {
+    path: "/settings-team",
     component: Team,
   },
   {
-    path: '/transactions',
-    component: Transactions,
-  },
-  {
-    path: '/settings-profile',
+    path: "/settings-profile",
     component: ProfileSettings,
   },
   {
-    path: '/settings-billing',
+    path: "/settings-billing",
     component: Bills,
   },
   {
-    path: '/campaigns',
+    path: "/campaigns",
     component: Campaigns,
   },
   {
-    path: '/campaign/new',
+    path: "/campaign/new",
     component: CampaignNew,
   },
   {
@@ -58,17 +59,13 @@ const routes = [
     component: CampaignDetail,
   },
   {
-    path: '/charts',
-    component: Charts,
-  },
-  {
-    path: '/404',
+    path: "/404",
     component: Page404,
   },
   {
-    path: '/blank',
+    path: "/blank",
     component: Blank,
   },
-]
+];
 
-export default routes
+export default routes;

@@ -67,6 +67,7 @@ function Campaigns() {
       <br />
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {campaigns &&
+          campaigns.length > 0 &&
           campaigns.map((i, k) => {
             return (
               <CampaignCard

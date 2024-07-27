@@ -5,6 +5,7 @@ import BellIcon from "@heroicons/react/24/outline/BellIcon";
 import Bars3Icon from "@heroicons/react/24/outline/Bars3Icon";
 import MoonIcon from "@heroicons/react/24/outline/MoonIcon";
 import SunIcon from "@heroicons/react/24/outline/SunIcon";
+import UserIcon from "@heroicons/react/24/outline/UserIcon";
 import { openRightDrawer } from "../features/common/rightDrawerSlice";
 // import { RIGHT_DRAWER_TYPES } from "../utils/globalConstantUtil";
 
@@ -114,8 +115,8 @@ function Header() {
           {/* Profile icon, opening menu on click */}
           <div className="dropdown dropdown-end ml-4">
             <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
-              <div className="w-10 rounded-full">
-                <img src="https://placeimg.com/80/80/people" alt="profile" />
+              <div className="rounded-full">
+                <UserIcon className="h-6 w-6" />
               </div>
             </label>
             <ul
@@ -123,10 +124,7 @@ function Header() {
               className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52"
             >
               <li className="justify-between">
-                <Link to={"/app/settings-profile"}>
-                  Profile Settings
-                  <span className="badge">New</span>
-                </Link>
+                <Link to={"/app/settings-profile"}>Profile Settings</Link>
               </li>
               <li className="">
                 <Link to={"/app/settings-billing"}>Bill History</Link>

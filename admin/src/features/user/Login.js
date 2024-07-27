@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import LandingIntro from "./LandingIntro";
 import ErrorText from "../../components/Typography/ErrorText";
 import InputText from "../../components/Input/InputText";
 import axios from "axios";
@@ -48,8 +47,31 @@ function Login() {
     <div className="min-h-screen bg-base-200 flex items-center">
       <div className="card mx-auto w-full max-w-5xl  shadow-xl">
         <div className="grid  md:grid-cols-2 grid-cols-1  bg-base-100 rounded-xl">
-          <div className="">
-            <LandingIntro />
+          <div className="hero min-h-full rounded-l-xl bg-base-200">
+            <div className="hero-content py-12">
+              <div className="max-w-md">
+                <h1 className="text-3xl text-center font-bold ">
+                  <img
+                    src="/logo.png"
+                    className="w-18 inline-block mr-2 mask"
+                    alt="Mediways-logo"
+                  />
+                  Mediways
+                </h1>
+
+                <div className="text-center mt-12">
+                  <img
+                    src="./intro.png"
+                    alt="Mediways Admin Panel"
+                    className="w-48 inline-block"
+                  ></img>
+                </div>
+
+                <h1 className="text-2xl mt-8 font-bold">
+                  Mediways Admin Panel
+                </h1>
+              </div>
+            </div>
           </div>
           <div className="py-24 px-10">
             <h2 className="text-2xl font-semibold mb-2 text-center">Login</h2>
@@ -75,12 +97,7 @@ function Login() {
               </div>
 
               <ErrorText styleClass="mt-8">{errorMessage}</ErrorText>
-              <button
-                type="submit"
-                className={
-                  "btn mt-2 w-full btn-primary" + (loading ? " loading" : "")
-                }
-              >
+              <button type="submit" className="btn mt-2 w-full btn-primary">
                 Login
               </button>
             </form>
