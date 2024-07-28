@@ -38,24 +38,7 @@ const routes = [
     icon: <Cog6ToothIcon className={`${iconClasses} inline`} />, // icon component
     iconlarge: <Cog6ToothIcon className={`${iconLargeClasses} inline`} />, // icon component
     name: "Settings", // name that appear in Sidebar
-    desc: "Modify settings for admin panel",
-    submenu: [
-      {
-        path: "/app/settings-profile", //url
-        icon: <UserIcon className={submenuIconClasses} />, // icon component
-        name: "Profile", // name that appear in Sidebar
-      },
-      {
-        path: "/app/settings-billing",
-        icon: <WalletIcon className={submenuIconClasses} />,
-        name: "Billing",
-      },
-      {
-        path: "/app/settings-team", // url
-        icon: <UsersIcon className={submenuIconClasses} />, // icon component
-        name: "Team Members", // name that appear in Sidebar
-      },
-    ],
+    desc: "Modify settings",
   },
 ];
 

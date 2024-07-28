@@ -32,7 +32,7 @@ app.use(express.json());
 
 exports.AdminLogin = async (req, res, next) => {
   const { emailId, password } = req.body;
-  console.log("here");
+
   try {
     if (!validator.isEmail(emailId)) {
       return res.status(400).json({
@@ -46,7 +46,6 @@ exports.AdminLogin = async (req, res, next) => {
         error: "wrong email or password",
       });
     }
-
     const match = await bcrypt.compare(password, admin.password);
     if (!match) {
       // AlertEmail(emailId, "Login to Admin Panel with wrong credentials");
@@ -69,5 +68,59 @@ exports.AdminLogin = async (req, res, next) => {
     res.status(500).json({
       error: "Internal server error",
     });
+  }
+};
+
+exports.GetProfile = async (req, res, next) => {
+  try {
+    const admin = await adminModel.findOne(
+      { email: req.admin.email },
+      "name about"
+    );
+
+    if (!admin) {
+      return res.status(404).json({ error: "Admin not found" });
+    }
+
+    res.status(200).json({ admin });
+  } catch (error) {
+    console.error("Error fetching admin profile:", error);
+    // sendErrorEmail(req.admin.email, "Error fetching admin profile");
+    res.status(500).json({ error: "Failed to fetch data" });
+  }
+};
+exports.UpdateProfile = async (req, res, next) => {
+  const { name, email, oldpassword, about, newpassword } =
+    req.body;
+
+  try {
+    const admin = await adminModel.findOne({ email });
+
+    if (newpassword != oldpassword) {
+      const match = await bcrypt.compare(oldpassword, admin.password);
+      if (!match) {
+        return res.status(400).json({
+          error: "Wrong password",
+        });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const hash = await bcrypt.hash(newpassword, salt);
+
+      admin.password = hash;
+    }
+
+    admin.name = name;
+    admin.about = about;
+    await admin.save();
+    // sendErrorEmail(email, "Admin Password changed");
+
+    res.status(200).json({
+      msg: "Password change successful",
+    });
+  } catch (error) {
+    console.log(error);
+    // sendErrorEmail(email, "Someone tried to Change Admin Password");
+    res.status(500).json({ error: "Failed to change password" });
   }
 };

@@ -213,6 +213,52 @@ function CampaignDetail() {
     }
   };
 
+  const handleDelete = async (e) => {
+    e.preventDefault();
+    setErrorMessage("");
+
+    if (!link) {
+      NotificationManager.error("Error", "Item couldn't be selected");
+      return;
+    }
+    if (!window.confirm("Are you sure you want to delete this campaign?")) {
+      return;
+    }
+    const password = window.prompt("Please enter your password to confirm:");
+    if (!password) {
+      NotificationManager.error("Error", "Password is required to delete");
+      return;
+    }
+    try {
+      setLoading(true);
+      const response = await axios.delete(
+        `${import.meta.env.VITE_SERVER_URL}/admin/campaign-delete/${link}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          data: {
+            password: password,
+          },
+        }
+      );
+      NotificationManager.success("Success", "Deleted Successfully");
+      navigate(`/app/campaigns`);
+    } catch (error) {
+      setErrorMessage(error.response.data.error);
+
+      NotificationManager.error(
+        "Error",
+        "Failed to delete the Specialty",
+        5000,
+        () => {
+          alert(error.response.data.error);
+        }
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <>
       <NotificationContainer />
@@ -336,6 +382,15 @@ function CampaignDetail() {
             }
           >
             Update
+          </button>
+          <button
+            onClick={handleDelete}
+            className={
+              "btn mt-6 w-full text-white bg-red-700" +
+              (loading ? " loading" : "")
+            }
+          >
+            Delete
           </button>
         </div>
       )}

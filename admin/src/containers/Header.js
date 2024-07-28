@@ -14,6 +14,7 @@ import { NavLink, Routes, Link, useLocation } from "react-router-dom";
 function Header() {
   const dispatch = useDispatch();
   const { noOfNotifications, pageTitle } = useSelector((state) => state.header);
+  console.log(useSelector((state)=>state))
   const [currentTheme, setCurrentTheme] = useState(
     localStorage.getItem("theme")
   );
@@ -124,10 +125,7 @@ function Header() {
               className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52"
             >
               <li className="justify-between">
-                <Link to={"/app/settings-profile"}>Profile Settings</Link>
-              </li>
-              <li className="">
-                <Link to={"/app/settings-billing"}>Bill History</Link>
+                <Link to={"/app/settings"}>Settings</Link>
               </li>
               <div className="divider mt-0 mb-0"></div>
               <li>

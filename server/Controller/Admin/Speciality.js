@@ -22,6 +22,8 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const s3 = require("../../config/aws_s3");
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
 
 dotenv.config({ path: path.join(__dirname, "..", "..", "api", ".env") });
 
@@ -156,6 +158,7 @@ exports.UpdateSpecialityDetails = async (req, res) => {
     speciality.title = title;
     speciality.desc = desc;
     speciality.content = content;
+    speciality.lastUpdate = moment().format("MMMM Do YYYY, h:mm:ss a");
 
     // Update icon if present
     if (req.files.icon) {
@@ -224,13 +227,27 @@ exports.UploadSpecialityImgtoS3 = async (req, res) => {
   try {
     if (req.files.image) {
       const image = req.files.image[0];
-      const specialityImageKey = `specialities/${link}/specialityImages/${image.originalname}`;
+      const originalname = image.originalname
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, "-")
+        .replace(/[^\w\-]+/g, "")
+        .substring(0, 50);
+      const specialityImageKey = `specialities/${link}/specialityImages/${originalname}`;
 
       const specialityImageUrl = await UploadImgToS3(
         specialityImageKey,
         image.buffer,
         image.originalname
       );
+      const speciality = await specialityModel.findOne({ id: link });
+
+      if (!speciality) {
+        return res.status(404).json({ error: "Speciality not found" });
+      }
+      speciality.content = speciality.content + `<img src="${specialityImageUrl}" />`;
+      await speciality.save();
+
       res
         .status(200)
         .json({ message: "Image uploaded successfully", specialityImageUrl });
@@ -238,5 +255,64 @@ exports.UploadSpecialityImgtoS3 = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
+  }
+};
+
+exports.DeleteSpeciality = async (req, res) => {
+  const { id } = req.params; // Ensure this matches the route parameter name
+  const { password } = req.body;
+
+  try {
+    const admin = await adminModel.findOne({ email: req.admin.email });
+    if (!admin) {
+      return res.status(401).json({ error: "User not found" });
+    }
+    const match = await bcrypt.compare(password, admin.password);
+    if (!match) {
+      // AlertEmail(emailId, "Login to Admin Panel with wrong credentials");
+      return res.status(400).json({
+        error: "wrong password",
+      });
+    }
+
+    const speciality = await specialityModel.findOne({ id });
+
+    if (!speciality) {
+      return res.status(404).json({ error: "Speciality not found" });
+    }
+
+    // Parse the speciality content to extract image URLs
+    const { content } = speciality;
+    const dom = new JSDOM(content);
+    const images = dom.window.document.getElementsByTagName("img");
+
+    // Delete each image from S3
+    for (let img of images) {
+      const imgUrl = img.src;
+      const Key = imgUrl.split(".com/")[1];
+      await DeleteImgfromS3(Key);
+    }
+
+    // Delete icon from S3
+    if (speciality.icon) {
+      const IconKey = speciality.icon.split(".com/")[1];
+      await DeleteImgfromS3(IconKey);
+    }
+
+    // Delete wallpaper image from S3
+    if (speciality.wallpaperimg) {
+      const WallPaperImgKey = speciality.wallpaperimg.split(".com/")[1];
+      await DeleteImgfromS3(WallPaperImgKey);
+    }
+
+    // Delete the speciality from the database
+    await specialityModel.findOneAndDelete({ id });
+
+    res
+      .status(200)
+      .json({ message: "Speciality Deleted successfully", speciality });
+  } catch (error) {
+    console.error("Error deleting speciality:", error);
+    res.status(500).json({ error: "Failed to delete speciality" });
   }
 };

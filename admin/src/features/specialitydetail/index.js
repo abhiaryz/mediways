@@ -55,7 +55,7 @@ function SpecialityDetail() {
           }
         );
         const speciality = response.data.speciality;
-        console.log(response.data.speciality)
+        console.log(response.data.speciality);
         setFormData((prevFormData) => ({
           ...prevFormData,
           title: speciality.title,
@@ -146,6 +146,8 @@ function SpecialityDetail() {
       formDataToSend.append("imagesToDelete", JSON.stringify(imagesToDelete));
     }
     try {
+      setLoading(true);
+
       const response = await axios.put(
         `${
           import.meta.env.VITE_SERVER_URL

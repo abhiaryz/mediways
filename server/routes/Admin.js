@@ -2,7 +2,11 @@ const express = require("express");
 const router = express.Router();
 const requireAuth = require("../middleware/Admin");
 
-const { AdminLogin } = require("../Controller/Admin/User");
+const {
+  AdminLogin,
+  GetProfile,
+  UpdateProfile,
+} = require("../Controller/Admin/User");
 const {
   CampaignNew,
   GetAllCampaigns,
@@ -10,6 +14,7 @@ const {
   UpdateCampaignDetails,
   UploadCampaignImgtoS3,
   GetCampaignImgPresignedUrl,
+  DeleteCampaign,
 } = require("../Controller/Admin/Campaign");
 
 const {
@@ -18,6 +23,7 @@ const {
   GetSpecialityDetails,
   UpdateSpecialityDetails,
   UploadSpecialityImgtoS3,
+  DeleteSpeciality,
 } = require("../Controller/Admin/Speciality");
 
 // Configure multer for memory storage
@@ -26,6 +32,8 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 router.route("/admin/login").post(AdminLogin);
+router.route("/admin/get-profile").get(requireAuth, GetProfile);
+router.route("/admin/update-profile").post(requireAuth, UpdateProfile);
 
 router.post(
   "/admin/campaign-new",
@@ -51,6 +59,10 @@ router.post(
   upload.fields([{ name: "image", maxCount: 1 }]),
   UploadCampaignImgtoS3
 );
+router
+  .route("/admin/campaign-delete/:link")
+  .delete(requireAuth, DeleteCampaign);
+
 // router.post(
 //   "/admin/get-campaign-img-presigned-url/:link",
 //   GetCampaignImgPresignedUrl
@@ -80,5 +92,8 @@ router.post(
   upload.fields([{ name: "image", maxCount: 1 }]),
   UploadSpecialityImgtoS3
 );
+router
+  .route("/admin/speciality-delete/:id")
+  .delete(requireAuth, DeleteSpeciality);
 
 module.exports = router;

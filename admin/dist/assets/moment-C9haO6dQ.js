@@ -1,4 +1,4 @@
-import{j as ce}from"./index-vvvWIYqA.js";import{S as Ss}from"./Subtitle-1WpuQ5SU.js";function On({title:e,children:t,topMargin:s,TopSideButtons:r}){return ce.jsxs("div",{className:"card w-full p-6 bg-base-100 shadow-xl "+(s||"mt-6"),children:[ce.jsxs(Ss,{styleClass:r?"inline-block":"",children:[e,r&&ce.jsx("div",{className:"inline-block float-right",children:r})]}),ce.jsx("div",{className:"divider mt-2"}),ce.jsx("div",{className:"h-full w-full pb-6 bg-base-100",children:t})]})}//! moment.js
+import{j as ce}from"./index-B1WDzP11.js";import{S as Ss}from"./Subtitle-B4toLw5U.js";function On({title:e,children:t,topMargin:s,TopSideButtons:r}){return ce.jsxs("div",{className:"card w-full p-6 bg-base-100 shadow-xl "+(s||"mt-6"),children:[ce.jsxs(Ss,{styleClass:r?"inline-block":"",children:[e,r&&ce.jsx("div",{className:"inline-block float-right",children:r})]}),ce.jsx("div",{className:"divider mt-2"}),ce.jsx("div",{className:"h-full w-full pb-6 bg-base-100",children:t})]})}//! moment.js
 //! version : 2.30.1
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
 //! license : MIT

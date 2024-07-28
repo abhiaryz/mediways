@@ -22,6 +22,8 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const s3 = require("../../config/aws_s3");
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
 
 dotenv.config({ path: path.join(__dirname, "..", "..", "api", ".env") });
 
@@ -160,6 +162,7 @@ exports.UpdateCampaignDetails = async (req, res) => {
     campaign.amount = amount;
     campaign.beneficiaryName = beneficiaryName;
     campaign.content = content;
+    campaign.lastUpdate = moment().format("MMMM Do YYYY, h:mm:ss a");
 
     // Update thumbnail if present
     if (req.files.thumbnail) {
@@ -230,13 +233,29 @@ exports.UploadCampaignImgtoS3 = async (req, res) => {
   try {
     if (req.files.image) {
       const image = req.files.image[0];
-      const campaignImageKey = `campaigns/${link}/campaignImages/${image.originalname}`;
+      const originalname = image.originalname
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, "-")
+        .replace(/[^\w\-]+/g, "")
+        .substring(0, 50);
+
+      const campaignImageKey = `campaigns/${link}/campaignImages/${originalname}`;
 
       const campaignImageUrl = await UploadImgToS3(
         campaignImageKey,
         image.buffer,
         image.originalname
       );
+
+      const campaign = await campaignModel.findOne({ id: link });
+
+      if (!campaign) {
+        return res.status(404).json({ error: "Campaign not found" });
+      }
+      campaign.content = value + `<img src="${campaignImageUrl}" />`;
+      await campaign.save();
+
       res
         .status(200)
         .json({ message: "Image uploaded successfully", campaignImageUrl });
@@ -260,5 +279,67 @@ exports.GetCampaignImgPresignedUrl = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
+  }
+};
+
+exports.DeleteCampaign = async (req, res) => {
+  const { link } = req.params; // Ensure this matches the route parameter name
+  const { password } = req.body;
+
+  try {
+    const admin = await adminModel.findOne({ email: req.admin.email });
+    if (!admin) {
+      return res.status(401).json({ error: "User not found" });
+    }
+    const match = await bcrypt.compare(password, admin.password);
+    if (!match) {
+      // AlertEmail(emailId, "Login to Admin Panel with wrong credentials");
+      return res.status(400).json({
+        error: "wrong password",
+      });
+    }
+    const campaign = await campaignModel.findOne({ id: link });
+
+    if (!campaign) {
+      return res.status(404).json({ error: "Campaign not found" });
+    }
+
+    // Parse the campaign content to extract image URLs
+    const { content } = campaign;
+    const dom = new JSDOM(content);
+    const images = dom.window.document.getElementsByTagName("img");
+
+    // Delete each image from S3
+    for (let img of images) {
+      const imgUrl = img.src;
+      console.log(new URL(imgUrl).pathname.substring(1));
+      const Key = imgUrl.split(".com/")[1];
+      console.log(Key);
+      await DeleteImgfromS3(Key);
+    }
+
+    // Delete thumbnail from S3
+    if (campaign.thumbnail) {
+      const thumbnailKey = campaign.thumbnail.split(".com/")[1];
+      await DeleteImgfromS3(thumbnailKey);
+    }
+
+    // Delete carousel images from S3
+    for (const carousel of campaign.carousel) {
+      if (carousel) {
+        const carouselKey = carousel.split(".com/")[1];
+        await DeleteImgfromS3(carouselKey);
+      }
+    }
+
+    // Delete the campaign from the database
+    await campaignModel.findOneAndDelete({ id: link });
+
+    res
+      .status(200)
+      .json({ message: "Campaign deleted successfully", campaign });
+  } catch (error) {
+    console.error("Error deleting campaign:", error);
+    res.status(500).json({ error: "Failed to delete campaign" });
   }
 };

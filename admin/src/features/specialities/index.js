@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import TitleCard from "../../components/Cards/TitleCard";
 import { openModal } from "../common/modalSlice";
-import { deleteLead, getLeadsContent } from "./leadSlice";
-// import { CONFIRMATION_MODAL_CLOSE_TYPES, MODAL_BODY_TYPES } from '../../utils/globalConstantUtil'
 import TrashIcon from "@heroicons/react/24/outline/TrashIcon";
 import PencilIcon from "@heroicons/react/24/outline/PencilIcon";
 import { showNotification } from "../common/headerSlice";
@@ -33,43 +31,56 @@ function Specialities() {
   const [specialities, setspecialities] = useState();
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        if (token) {
-          setLoading(true);
-          const response = await axios.get(
-            `${import.meta.env.VITE_SERVER_URL}/admin/get-all-specialties`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-          console.log(response.data.specialities);
-          setspecialities(response.data.specialities);
-        }
-      } catch (error) {
-        console.log(error);
-
-        if (error.response && error.response.status === 401) {
-          return navigate(`/`);
-        }
-        NotificationManager.error(
-          "Failed to fetch campaigns",
-          "Error",
-          5000,
-          () => {
-            alert(error.response.data.error);
+  const fetchData = async () => {
+    try {
+      if (token) {
+        setLoading(true);
+        const response = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/admin/get-all-specialties`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
         );
-      } finally {
-        setLoading(false);
+        setspecialities(response.data.specialities);
       }
-    };
+    } catch (error) {
+      console.log(error);
 
+      if (error.response && error.response.status === 401) {
+        return navigate(`/`);
+      }
+      NotificationManager.error(
+        "Failed to fetch campaigns",
+        "Error",
+        5000,
+        () => {
+          alert(error.response.data.error);
+        }
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
     fetchData();
   }, [token]);
+  
+  const deleteCurrentLead = (item) => {
+    dispatch(
+      openModal({
+        title: "Confirmation",
+        bodyType: "CONFIRMATION",
+        extraObject: {
+          message: `Are you sure you want to delete `,
+          type: "LEAD_DELETE",
+          item,
+        },
+      })
+    );
+    fetchData();
+  };
 
   return (
     <>
@@ -86,7 +97,7 @@ function Specialities() {
                 <th>Description</th>
                 <th>Last Update</th>
                 <th>Created At</th>
-                <th></th>
+                <th></th> <th></th>
               </tr>
             </thead>
             <tbody>
@@ -121,6 +132,14 @@ function Specialities() {
                             </p>
                           </button>
                         </Link>
+                      </td>
+                      <td>
+                        <button
+                          className="btn btn-square btn-ghost"
+                          onClick={() => deleteCurrentLead(item)}
+                        >
+                          <TrashIcon className="w-5" />
+                        </button>
                       </td>
                     </tr>
                   );
