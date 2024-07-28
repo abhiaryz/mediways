@@ -36,12 +36,15 @@ exports.CampaignNew = async (req, res, next) => {
   try {
     const { title, status, amount, beneficiaryName } = req.body;
     // Generate a proper ID from the title
-    const id = title
+    const link = title
       .toLowerCase()
       .trim()
       .replace(/\s+/g, "-")
       .replace(/[^\w\-]+/g, "")
       .substring(0, 50);
+    const prefix = "CAMPAIGN";
+    const uniquePart = uuidv4().replace(/-/g, "").substr(0, 6);
+    const id = `${prefix}${uniquePart}`;
 
     // Handle thumbnail upload
     let thumbnailUrl = null;
@@ -76,6 +79,7 @@ exports.CampaignNew = async (req, res, next) => {
     const newCampaign = new campaignModel({
       title,
       id,
+      link,
       beneficiaryName,
       status,
       amount,
@@ -109,7 +113,7 @@ exports.CampaignNew = async (req, res, next) => {
 
 exports.GetAllCampaigns = async (req, res, next) => {
   try {
-    const campaigns = await campaignModel.find({}, "title thumbnail id");
+    const campaigns = await campaignModel.find({}, "title thumbnail id link");
 
     res.status(200).json({ campaigns });
   } catch (error) {
@@ -124,7 +128,7 @@ exports.GetCampaignDetails = async (req, res, next) => {
   const { link } = req.params;
 
   try {
-    const campaign = await campaignModel.findOne({ id: link });
+    const campaign = await campaignModel.findOne({ link });
     if (!campaign) {
       return res.status(404).json({ message: "Campaign not found" });
     }
@@ -138,17 +142,17 @@ exports.GetCampaignDetails = async (req, res, next) => {
 };
 
 exports.UpdateCampaignDetails = async (req, res) => {
-  const { link } = req.params;
+  let { link } = req.params;
   const { title, status, amount, beneficiaryName, content, imagesToDelete } =
     req.body;
 
   try {
-    const campaign = await campaignModel.findOne({ id: link });
+    const campaign = await campaignModel.findOne({ link });
 
     if (!campaign) {
       return res.status(404).json({ error: "Campaign not found" });
     }
-    const id = title
+    link = title
       .toLowerCase()
       .trim()
       .replace(/\s+/g, "-")
@@ -156,7 +160,7 @@ exports.UpdateCampaignDetails = async (req, res) => {
       .substring(0, 50);
 
     // Update text fields
-    campaign.id = id;
+    campaign.link = link;
     campaign.title = title;
     campaign.status = status;
     campaign.amount = amount;
@@ -172,9 +176,9 @@ exports.UpdateCampaignDetails = async (req, res) => {
         await DeleteImgfromS3(oldThumbnailKey);
       }
       const thumbnail = req.files.thumbnail[0];
-      const thumbnailKey = `campaigns/${link}/thumbnail/thumbnail${path.extname(
-        thumbnail.originalname
-      )}`;
+      const thumbnailKey = `campaigns/${
+        campaign.id
+      }/thumbnail/thumbnail${path.extname(thumbnail.originalname)}`;
       const thumbnailUrl = await UploadImgToS3(
         thumbnailKey,
         thumbnail.buffer,
@@ -193,7 +197,7 @@ exports.UpdateCampaignDetails = async (req, res) => {
       const carouselImages = req.files.carouselImages;
       const carouselUrls = await Promise.all(
         carouselImages.map((item) => {
-          const carouselImageKey = `campaigns/${link}/carouselImages/${item.originalname}`;
+          const carouselImageKey = `campaigns/${campaign.id}/carouselImages/${item.originalname}`;
           return UploadImgToS3(
             carouselImageKey,
             item.buffer,
@@ -231,6 +235,12 @@ exports.UpdateCampaignDetails = async (req, res) => {
 exports.UploadCampaignImgtoS3 = async (req, res) => {
   const { link } = req.params;
   try {
+    const campaign = await campaignModel.findOne({ link });
+
+    if (!campaign) {
+      return res.status(404).json({ error: "Campaign not found" });
+    }
+
     if (req.files.image) {
       const image = req.files.image[0];
       const originalname = image.originalname
@@ -240,7 +250,7 @@ exports.UploadCampaignImgtoS3 = async (req, res) => {
         .replace(/[^\w\-]+/g, "")
         .substring(0, 50);
 
-      const campaignImageKey = `campaigns/${link}/campaignImages/${originalname}`;
+      const campaignImageKey = `campaigns/${campaign.id}/campaignImages/${originalname}`;
 
       const campaignImageUrl = await UploadImgToS3(
         campaignImageKey,
@@ -248,12 +258,7 @@ exports.UploadCampaignImgtoS3 = async (req, res) => {
         image.originalname
       );
 
-      const campaign = await campaignModel.findOne({ id: link });
-
-      if (!campaign) {
-        return res.status(404).json({ error: "Campaign not found" });
-      }
-      campaign.content = value + `<img src="${campaignImageUrl}" />`;
+      campaign.content = campaign.content + `<img src="${campaignImageUrl}" />`;
       await campaign.save();
 
       res
@@ -298,7 +303,7 @@ exports.DeleteCampaign = async (req, res) => {
         error: "wrong password",
       });
     }
-    const campaign = await campaignModel.findOne({ id: link });
+    const campaign = await campaignModel.findOne({ link });
 
     if (!campaign) {
       return res.status(404).json({ error: "Campaign not found" });
@@ -333,7 +338,7 @@ exports.DeleteCampaign = async (req, res) => {
     }
 
     // Delete the campaign from the database
-    await campaignModel.findOneAndDelete({ id: link });
+    await campaignModel.findOneAndDelete({  link });
 
     res
       .status(200)

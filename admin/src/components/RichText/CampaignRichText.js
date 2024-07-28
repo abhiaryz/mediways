@@ -33,10 +33,7 @@ export default function CampaignRichText({ id, label, value, setValue }) {
             `${
               import.meta.env.VITE_SERVER_URL
             }/admin/upload-campaign-image/${link}`,
-            {
-              formData,
-              value,
-            },
+            formData,
             {
               headers: {
                 Authorization: `Bearer ${token}`,

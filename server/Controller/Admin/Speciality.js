@@ -36,12 +36,15 @@ exports.SpecialityNew = async (req, res, next) => {
   try {
     const { title, desc } = req.body;
     // Generate a proper ID from the title
-    const id = title
+    const link = title
       .toLowerCase()
       .trim()
       .replace(/\s+/g, "-")
       .replace(/[^\w\-]+/g, "")
       .substring(0, 50);
+    const prefix = "SPECIALITY";
+    const uniquePart = uuidv4().replace(/-/g, "").substr(0, 6);
+    const id = `${prefix}${uniquePart}`;
 
     // Handle icon upload
     let iconUrl = null;
@@ -74,6 +77,7 @@ exports.SpecialityNew = async (req, res, next) => {
     const newSpeciality = new specialityModel({
       title,
       id,
+      link,
       desc,
       icon: iconUrl,
       wallpaperimg: wallpaperimgUrl,
@@ -107,7 +111,7 @@ exports.GetAllSpecialities = async (req, res, next) => {
   try {
     const specialities = await specialityModel.find(
       {},
-      "title icon id desc createdAt lastUpdate"
+      "title icon id desc createdAt lastUpdate link"
     );
 
     res.status(200).json({ specialities });
@@ -123,7 +127,7 @@ exports.GetSpecialityDetails = async (req, res, next) => {
   const { link } = req.params;
 
   try {
-    const speciality = await specialityModel.findOne({ id: link });
+    const speciality = await specialityModel.findOne({ link });
     if (!speciality) {
       return res.status(404).json({ message: "Speciality not found" });
     }
@@ -137,16 +141,16 @@ exports.GetSpecialityDetails = async (req, res, next) => {
 };
 
 exports.UpdateSpecialityDetails = async (req, res) => {
-  const { link } = req.params;
+  let { link } = req.params;
   const { title, desc, content, imagesToDelete } = req.body;
 
   try {
-    const speciality = await specialityModel.findOne({ id: link });
+    const speciality = await specialityModel.findOne({ link });
 
     if (!speciality) {
       return res.status(404).json({ error: "Speciality not found" });
     }
-    const id = title
+    link = title
       .toLowerCase()
       .trim()
       .replace(/\s+/g, "-")
@@ -154,7 +158,7 @@ exports.UpdateSpecialityDetails = async (req, res) => {
       .substring(0, 50);
 
     // Update text fields
-    speciality.id = id;
+    speciality.link = link;
     speciality.title = title;
     speciality.desc = desc;
     speciality.content = content;
@@ -168,7 +172,7 @@ exports.UpdateSpecialityDetails = async (req, res) => {
         await DeleteImgfromS3(oldiconKey);
       }
       const icon = req.files.icon[0];
-      const iconKey = `specialities/${link}/icon/icon${path.extname(
+      const iconKey = `specialities/${speciality.id}/icon/icon${path.extname(
         icon.originalname
       )}`;
       const IconUrl = await UploadImgToS3(
@@ -187,9 +191,9 @@ exports.UpdateSpecialityDetails = async (req, res) => {
         await DeleteImgfromS3(oldwallpaperimgKey);
       }
       const wallpaperimg = req.files.wallpaperimg[0];
-      const wallpaperimgKey = `specialities/${link}/wallpaperimg/wallpaperimg${path.extname(
-        wallpaperimg.originalname
-      )}`;
+      const wallpaperimgKey = `specialities/${
+        speciality.id
+      }/wallpaperimg/wallpaperimg${path.extname(wallpaperimg.originalname)}`;
       const wallpaperimgUrl = await UploadImgToS3(
         wallpaperimgKey,
         wallpaperimg.buffer,
@@ -225,6 +229,11 @@ exports.UpdateSpecialityDetails = async (req, res) => {
 exports.UploadSpecialityImgtoS3 = async (req, res) => {
   const { link } = req.params;
   try {
+    const speciality = await specialityModel.findOne({ link });
+
+    if (!speciality) {
+      return res.status(404).json({ error: "Speciality not found" });
+    }
     if (req.files.image) {
       const image = req.files.image[0];
       const originalname = image.originalname
@@ -233,19 +242,16 @@ exports.UploadSpecialityImgtoS3 = async (req, res) => {
         .replace(/\s+/g, "-")
         .replace(/[^\w\-]+/g, "")
         .substring(0, 50);
-      const specialityImageKey = `specialities/${link}/specialityImages/${originalname}`;
+      const specialityImageKey = `specialities/${speciality.id}/specialityImages/${originalname}`;
 
       const specialityImageUrl = await UploadImgToS3(
         specialityImageKey,
         image.buffer,
         image.originalname
       );
-      const speciality = await specialityModel.findOne({ id: link });
 
-      if (!speciality) {
-        return res.status(404).json({ error: "Speciality not found" });
-      }
-      speciality.content = speciality.content + `<img src="${specialityImageUrl}" />`;
+      speciality.content =
+        speciality.content + `<img src="${specialityImageUrl}" />`;
       await speciality.save();
 
       res
@@ -259,7 +265,7 @@ exports.UploadSpecialityImgtoS3 = async (req, res) => {
 };
 
 exports.DeleteSpeciality = async (req, res) => {
-  const { id } = req.params; // Ensure this matches the route parameter name
+  const { link } = req.params; // Ensure this matches the route parameter name
   const { password } = req.body;
 
   try {
@@ -275,7 +281,7 @@ exports.DeleteSpeciality = async (req, res) => {
       });
     }
 
-    const speciality = await specialityModel.findOne({ id });
+    const speciality = await specialityModel.findOne({ link });
 
     if (!speciality) {
       return res.status(404).json({ error: "Speciality not found" });

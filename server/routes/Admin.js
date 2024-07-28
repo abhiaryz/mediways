@@ -93,7 +93,7 @@ router.post(
   UploadSpecialityImgtoS3
 );
 router
-  .route("/admin/speciality-delete/:id")
+  .route("/admin/speciality-delete/:link")
   .delete(requireAuth, DeleteSpeciality);
 
 module.exports = router;

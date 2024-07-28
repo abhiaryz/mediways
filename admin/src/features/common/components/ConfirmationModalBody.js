@@ -5,16 +5,18 @@ import {
   NotificationManager,
 } from "react-notifications";
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
 function ConfirmationModalBody({ extraObject, closeModal }) {
   const { message, type, _id, item } = extraObject;
   const [loading, setLoading] = useState(false);
   const token = localStorage.getItem("token");
+  const { link } = useParams();
 
   const proceedWithYes = async (e) => {
     e.preventDefault();
 
-    if (!item.id) {
+    if (!item.link) {
       NotificationManager.error("Error", "Item couldn't be selected");
       return;
     }
@@ -27,7 +29,7 @@ function ConfirmationModalBody({ extraObject, closeModal }) {
     try {
       setLoading(true);
       const response = await axios.delete(
-        `${import.meta.env.VITE_SERVER_URL}/admin/speciality-delete/${item.id}`,
+        `${import.meta.env.VITE_SERVER_URL}/admin/speciality-delete/${link}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

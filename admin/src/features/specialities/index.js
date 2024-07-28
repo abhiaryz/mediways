@@ -125,7 +125,7 @@ function Specialities() {
                       <td>{item.lastUpdate}</td>
                       <td>{item.createdAt}</td>
                       <td>
-                        <Link to={`/app/specialities/${item.id}`}>
+                        <Link to={`/app/specialities/${item.link}`}>
                           <button className="btn btn-square btn-ghost p-4">
                             <p className="flex items-center gap-1">
                               Edit <PencilIcon className="w-5" />

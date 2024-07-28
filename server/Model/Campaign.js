@@ -11,6 +11,11 @@ const campaignSchema = new mongoose.Schema({
     unique: true,
     required: true,
   },
+  link: {
+    type: String,
+    unique: true,
+    required: true,
+  },
   beneficiaryName: {
     type: String,
     required: true,

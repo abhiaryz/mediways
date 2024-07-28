@@ -62,8 +62,10 @@ function Campaigns() {
         <CreateNewCard />
       </div>
       <br /> <br />
-      <br />
-      <Title children="Existing Campaigns" />
+      <br />{" "}
+      {campaigns && campaigns.length > 0 && (
+        <Title children="Existing Campaigns" />
+      )}
       <br />
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {campaigns &&
@@ -74,7 +76,7 @@ function Campaigns() {
                 key={k}
                 title={i.title}
                 url={i.thumbnail}
-                link={i.id}
+                link={i.link}
               />
             );
           })}

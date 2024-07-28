@@ -10,6 +10,11 @@ const specialitySchema = new mongoose.Schema({
     unique: true,
     required: true,
   },
+  link: {
+    type: String,
+    unique: true,
+    required: true,
+  },
   desc: {
     type: String,
   },
