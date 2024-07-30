@@ -29,9 +29,9 @@ function LeftSidebar() {
             <img
               className="mask w-16"
               src="/logo.png"
-              alt="Mediways Logo"
+              alt="AidCircle Logo"
             />
-            Mediways
+            AidCircle
           </Link>{" "}
         </li>
         {routes.map((route, k) => {

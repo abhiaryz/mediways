@@ -52,23 +52,23 @@ function Login() {
               <div className="max-w-md">
                 <h1 className="text-3xl text-center font-bold ">
                   <img
-                    src="/logo.png"
-                    className="w-18 inline-block mr-2 mask"
-                    alt="Mediways-logo"
+                    src="/public/assets/logo.png"
+                    className="w-12 inline-block mr-2 mask"
+                    alt="AidCircle-logo"
                   />
-                  Mediways
+                  AidCircle
                 </h1>
 
                 <div className="text-center mt-12">
                   <img
                     src="./intro.png"
-                    alt="Mediways Admin Panel"
+                    alt="AidCircle Admin Panel"
                     className="w-48 inline-block"
                   ></img>
                 </div>
 
                 <h1 className="text-2xl mt-8 font-bold">
-                  Mediways Admin Panel
+                  AidCircle Admin Panel
                 </h1>
               </div>
             </div>

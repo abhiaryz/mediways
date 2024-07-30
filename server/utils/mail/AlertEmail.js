@@ -24,7 +24,7 @@ const AlertEmail = async (email, action) => {
         } attempted to ${action ? action : "No message provided"} </p>
               <p>Please investigate and take necessary actions.</p>
         <p>Warm regards,</p>
-        <p>Mediways Notification System</p>
+        <p>AidCircle Notification System</p>
       `,
     };
 

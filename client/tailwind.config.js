@@ -1,35 +1,28 @@
 /** @type {import('tailwindcss').Config} */
-
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    colors: {
-      white: "#FFF",
-      black:"#000",
-      "blue-2": "#ADD7F6",
-      "blue-1": "#87BFFF",
-      "blue-0": "#3F8EFC",
-      "blue+1": "#2667FF",
-      "blue+2": "#3B28CC",
-      bluepurple: "#4633D7",
-      navyblue: "#1F20AE",
-      gray:"#000",
-      gray2:"#000",
-      red:"#700619"
-    },
     extend: {
-      screens: {
-        sm: { max: "639px" },
-        md: { max: "866px" },
-        lg: { min: "867px", max: "1100px" },
-        xl: { min: "1100px", max: "1279px" },
-        "2xl": { min: "1280px", max: "1335px" },
+      colors: {
+        darkBlue: "#000A2D",
+        lightBlue: "#3267FF",
+        skyBlue: "#2087FF",
+        muted: "#636571",
+        transparent: "#CBD9FF",
+        extraDark: "#00071D",
+        fadeBlue: "#5A81EE",
+      },
+      backgroundSize: {
+        "50%": "100rem",
+      },
+      borderRadius: {
+        "4xl": "2.7rem",
+        half: "50%",
+      },
+      flex: {
+        2: "2 2 0%",
       },
     },
   },
-  darkMode: "class",
   plugins: [],
 };

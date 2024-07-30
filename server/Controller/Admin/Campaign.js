@@ -317,9 +317,7 @@ exports.DeleteCampaign = async (req, res) => {
     // Delete each image from S3
     for (let img of images) {
       const imgUrl = img.src;
-      console.log(new URL(imgUrl).pathname.substring(1));
       const Key = imgUrl.split(".com/")[1];
-      console.log(Key);
       await DeleteImgfromS3(Key);
     }
 

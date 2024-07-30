@@ -119,7 +119,7 @@ exports.UpdateProfile = async (req, res, next) => {
       msg: "Password change successful",
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     // sendErrorEmail(email, "Someone tried to Change Admin Password");
     res.status(500).json({ error: "Failed to change password" });
   }

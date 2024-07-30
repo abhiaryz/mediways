@@ -25,7 +25,7 @@ const ErrorEmail = async (email, action) => {
         <p>But action Failed because of internal server error</p>
         <p>Please investigate and take necessary actions.</p>
         <p>Warm regards,</p>
-        <p>Mediways Notification System</p>
+        <p>AidCircle Notification System</p>
       `,
     };
 
