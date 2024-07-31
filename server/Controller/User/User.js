@@ -1,6 +1,7 @@
 const adminModel = require("../../Model/Admin");
 const campaignModel = require("../../Model/Campaign");
 const specialityModel = require("../../Model/Speciality");
+const serviceModel = require("../../Model/Services");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -34,7 +35,7 @@ exports.GetAllSpecialities = async (req, res, next) => {
   try {
     const specialities = await specialityModel.find(
       {},
-      "title icon id desc"
+      "title icon id desc link"
     );
 
     res.status(200).json({ specialities });
@@ -50,7 +51,7 @@ exports.GetSpecialityDetails = async (req, res, next) => {
   const { link } = req.params;
 
   try {
-    const speciality = await specialityModel.findOne({ id: link });
+    const speciality = await specialityModel.findOne({ link });
     if (!speciality) {
       return res.status(404).json({ message: "Speciality not found" });
     }
@@ -58,7 +59,23 @@ exports.GetSpecialityDetails = async (req, res, next) => {
       speciality,
     });
   } catch (error) {
-    console.error("Error fetching speciality details:", error);
+    console.log("Error fetching speciality details:", error);
     return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.GetAllServices = async (req, res, next) => {
+  try {
+    const services = await serviceModel.find(
+      {},
+      "title icon id desc link"
+    );
+
+    res.status(200).json({ services });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 };
