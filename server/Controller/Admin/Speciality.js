@@ -96,6 +96,7 @@ exports.SpecialityNew = async (req, res, next) => {
         title,
         id,
         desc,
+        link,
         icon: iconUrl,
         wallpaperimg: wallpaperimgUrl,
         content: "",

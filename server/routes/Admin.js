@@ -26,6 +26,13 @@ const {
   DeleteSpeciality,
 } = require("../Controller/Admin/Speciality");
 
+const {
+  GetAllServices,
+  ServiceNew,
+  UpdateServiceDetails,
+  DeleteService,
+} = require("../Controller/Admin/Service");
+
 // Configure multer for memory storage
 const multer = require("multer");
 const storage = multer.memoryStorage();
@@ -95,5 +102,19 @@ router.post(
 router
   .route("/admin/speciality-delete/:link")
   .delete(requireAuth, DeleteSpeciality);
+
+router.post(
+  "/admin/service-new",
+  upload.fields([{ name: "icon", maxCount: 1 }]),
+  ServiceNew
+);
+router.route("/admin/get-all-services").get(GetAllServices);
+
+router.put(
+  "/admin/update-service-detail/:id",
+  upload.fields([{ name: "icon", maxCount: 1 }]),
+  UpdateServiceDetails
+);
+router.route("/admin/service-delete/:id").delete(requireAuth, DeleteService);
 
 module.exports = router;

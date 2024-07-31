@@ -99,7 +99,7 @@ function Header() {
           </label>
 
           {/* Notification icon */}
-          <button
+          {/* <button
             className="btn btn-ghost ml-4  btn-circle"
             onClick={() => openNotification()}
           >
@@ -111,7 +111,7 @@ function Header() {
                 </span>
               ) : null}
             </div>
-          </button>
+          </button> */}
 
           {/* Profile icon, opening menu on click */}
           <div className="dropdown dropdown-end ml-4">

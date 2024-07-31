@@ -6,6 +6,7 @@ import Cog6ToothIcon from "@heroicons/react/24/outline/Cog6ToothIcon";
 import CurrencyDollarIcon from "@heroicons/react/24/outline/CurrencyDollarIcon";
 import InboxArrowDownIcon from "@heroicons/react/24/outline/InboxArrowDownIcon";
 import UsersIcon from "@heroicons/react/24/outline/UsersIcon";
+import BoltIcon from '@heroicons/react/24/outline/BoltIcon'
 
 const iconClasses = `h-6 w-6`;
 const iconLargeClasses = `h-10 w-10`;
@@ -17,11 +18,11 @@ const routes = [
     icon: <Squares2X2Icon className={iconClasses} />,
     iconlarge: <Squares2X2Icon className={iconLargeClasses} />,
     name: "Dashboard",
-    desc: 'Home'
+    desc: "Home",
   },
   {
     path: "/app/Specialities", // url
-    icon: <InboxArrowDownIcon className={iconClasses} />, // icon component    
+    icon: <InboxArrowDownIcon className={iconClasses} />, // icon component
     iconlarge: <InboxArrowDownIcon className={iconLargeClasses} />, // icon component
     name: "Specialities", // name that appear in Sidebar
     desc: "Create new or Modify exisiting Speciality",
@@ -32,6 +33,13 @@ const routes = [
     iconlarge: <CurrencyDollarIcon className={iconLargeClasses} />, // icon component
     name: "Campaigns", // name that appear in Sidebar
     desc: "Create new or Modify exisiting Campaign",
+  },
+  {
+    path: "/app/services", // url
+    icon: <BoltIcon className={iconClasses} />, // icon component
+    name: "Integration", // name that appear in Sidebar
+    name: "Services", // name that appear in Sidebar
+    desc: "Create new or Modify exisiting Services",
   },
   {
     path: "/app/settings", //no url needed as this has submenu
