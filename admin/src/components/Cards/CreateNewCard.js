@@ -1,5 +1,6 @@
 import Subtitle from "../Typography/Subtitle";
 import { Link, useNavigate } from "react-router-dom";
+import PlusIcon from "@heroicons/react/24/outline/PlusIcon";
 
 function CreateNewCard() {
   const navigate = useNavigate();
@@ -9,9 +10,10 @@ function CreateNewCard() {
   return (
     <div className={"card w-full p-4 shadow-xl"}>
       <Link to="/app/campaign/new">
-        <Subtitle>Create New Campaign</Subtitle>
-        <div className="divider mt-2"></div>{" "}
-        <img alt="add" src="/public/assets/icons/plus.svg" className="w-full" />
+        <div className="flex gap-2 items-center">
+          <PlusIcon className="w-10" />
+          <Subtitle>Create new campaign</Subtitle>
+        </div>
       </Link>
     </div>
   );

@@ -37,7 +37,7 @@ const routes = [
   {
     path: "/app/services", // url
     icon: <BoltIcon className={iconClasses} />, // icon component
-    name: "Integration", // name that appear in Sidebar
+    iconlarge: <BoltIcon className={iconLargeClasses} />, // icon component
     name: "Services", // name that appear in Sidebar
     desc: "Create new or Modify exisiting Services",
   },
