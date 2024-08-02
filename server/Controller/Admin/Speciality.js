@@ -313,7 +313,7 @@ exports.DeleteSpeciality = async (req, res) => {
     }
 
     // Delete the speciality from the database
-    await specialityModel.findOneAndDelete({ id });
+    await specialityModel.findOneAndDelete({ link });
 
     res
       .status(200)
