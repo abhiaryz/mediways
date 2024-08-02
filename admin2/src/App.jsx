@@ -6,7 +6,7 @@ import checkAuth from './app/auth';
 import initializeApp from './app/init';
 
 // Importing pages
-const Layout = lazy(() => import('./containers/Layout'))
+// const Layout = lazy(() => import('./containers/Layout'))
 const Login = lazy(() => import('./pages/Login'))
 
 
@@ -33,7 +33,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           
           {/* Place new routes over this */}
-          <Route path="/app/*" element={<Layout />} />
+          {/* <Route path="/app/*" element={<Layout />} /> */}
 
           <Route path="*" element={<Navigate to={token ? "/app/dashboard" : "/login"} replace />}/>
 
