@@ -29,7 +29,7 @@ function ConfirmationModalBody({ extraObject, closeModal }) {
     try {
       setLoading(true);
       const response = await axios.delete(
-        `${import.meta.env.VITE_SERVER_URL}/admin/speciality-delete/${item.link}`,
+        `${import.meta.env.VITE_SERVER_URL}/admin/speciality-delete/${link}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
