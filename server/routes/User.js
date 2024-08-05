@@ -5,6 +5,8 @@ const {
   GetAllSpecialities,
   GetSpecialityDetails,
   GetAllServices,
+  GetCampaignDetails,
+  GetAllCampaigns,
 } = require("../Controller/User/User");
 
 // router.route("/user/get-all-campaigns").get(GetAllCampaigns);
@@ -13,5 +15,7 @@ const {
 router.route("/user/get-all-specialties").get(GetAllSpecialities);
 router.route("/user/get-speciality-details/:link").get(GetSpecialityDetails);
 router.route("/user/get-all-services").get(GetAllServices);
+router.route("/user/get-all-campaigns").get(GetAllCampaigns);
+router.route("/user/get-campaign-details/:link").get(GetCampaignDetails);
 
 module.exports = router;

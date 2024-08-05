@@ -66,10 +66,7 @@ exports.GetSpecialityDetails = async (req, res, next) => {
 
 exports.GetAllServices = async (req, res, next) => {
   try {
-    const services = await serviceModel.find(
-      {},
-      "title icon id desc link"
-    );
+    const services = await serviceModel.find({}, "title icon id desc link");
 
     res.status(200).json({ services });
   } catch (error) {
@@ -77,5 +74,38 @@ exports.GetAllServices = async (req, res, next) => {
     res
       .status(500)
       .json({ message: "Internal server error", error: error.message });
+  }
+};
+
+exports.GetAllCampaigns = async (req, res, next) => {
+  try {
+    const campaigns = await campaignModel.find(
+      { status: "public" }, // Filter for public campaigns
+      "title id link beneficiaryName thumbnail amount"
+    );
+
+    res.status(200).json({ campaigns });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
+};
+
+exports.GetCampaignDetails = async (req, res, next) => {
+  const { link } = req.params;
+
+  try {
+    const campaign = await campaignModel.findOne({ link });
+    if (!campaign) {
+      return res.status(404).json({ message: "campaign not found" });
+    }
+    return res.status(200).json({
+      campaign,
+    });
+  } catch (error) {
+    console.log("Error fetching campaign details:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
