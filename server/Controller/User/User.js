@@ -97,15 +97,14 @@ exports.GetCampaignDetails = async (req, res, next) => {
   const { link } = req.params;
 
   try {
-    const campaign = await campaignModel.findOne({ link });
+    const campaign = await campaignModel.findOne({ link, status: "public" });
     if (!campaign) {
-      return res.status(404).json({ message: "campaign not found" });
+      return res.status(404).json({ message: "Campaign not found or not public" });
     }
-    return res.status(200).json({
-      campaign,
-    });
+    return res.status(200).json({ campaign });
   } catch (error) {
     console.log("Error fetching campaign details:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
