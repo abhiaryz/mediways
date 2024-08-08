@@ -41,7 +41,7 @@ exports.CampaignNew = async (req, res, next) => {
       .trim()
       .replace(/\s+/g, "-")
       .replace(/[^\w\-]+/g, "")
-      .substring(0, 50);
+      .substring(0, 100);
     const prefix = "CAMPAIGN";
     const uniquePart = uuidv4().replace(/-/g, "").substr(0, 6);
     const id = `${prefix}${uniquePart}`;
@@ -143,8 +143,19 @@ exports.GetCampaignDetails = async (req, res, next) => {
 
 exports.UpdateCampaignDetails = async (req, res) => {
   let { link } = req.params;
-  const { title, status, amount, beneficiaryName, content, imagesToDelete } =
-    req.body;
+  const {
+    title,
+    status,
+    amount,
+    amountDonated,
+    beneficiaryName,
+    beneficiaryUPI,
+    bankAccount,
+    IFSC,
+    updates,
+    content,
+    imagesToDelete,
+  } = req.body;
 
   try {
     const campaign = await campaignModel.findOne({ link });
@@ -157,14 +168,19 @@ exports.UpdateCampaignDetails = async (req, res) => {
       .trim()
       .replace(/\s+/g, "-")
       .replace(/[^\w\-]+/g, "")
-      .substring(0, 50);
+      .substring(0, 100);
 
     // Update text fields
     campaign.link = link;
     campaign.title = title;
     campaign.status = status;
     campaign.amount = amount;
+    campaign.amountDonated = amountDonated;
     campaign.beneficiaryName = beneficiaryName;
+    campaign.beneficiaryUPI = beneficiaryUPI;
+    campaign.bankAccount = bankAccount;
+    campaign.IFSC = IFSC;
+    campaign.updates = JSON.parse(updates);
     campaign.content = content;
     campaign.lastUpdate = moment().format("MMMM Do YYYY, h:mm:ss a");
 
@@ -187,16 +203,50 @@ exports.UpdateCampaignDetails = async (req, res) => {
       campaign.thumbnail = thumbnailUrl;
     }
 
-    // Update carousel images if present
-    if (req.files.carouselImages) {
-      // Delete old carousel images from S3
-      for (const image of campaign.carousel) {
-        const oldImageKey = image.split(".com/")[1];
-        await DeleteImgfromS3(oldImageKey);
+    // Update qrCode if present
+    if (req.files.qrCode) {
+      // Delete the old qrCode from S3
+      if (campaign.qrCode) {
+        const oldqrCodeKey = campaign.qrCode.split(".com/")[1];
+        await DeleteImgfromS3(oldqrCodeKey);
       }
-      const carouselImages = req.files.carouselImages;
+      const qrCode = req.files.qrCode[0];
+      const qrCodeKey = `campaigns/${campaign.id}/qrCode/qrCode${path.extname(
+        qrCode.originalname
+      )}`;
+      const qrCodeUrl = await UploadImgToS3(
+        qrCodeKey,
+        qrCode.buffer,
+        qrCode.originalname
+      );
+      campaign.qrCode = qrCodeUrl;
+    }
+
+    // Update carousel images if present
+    if (req.files.carouselImages || req.body.carouselImagesToDelete) {
+      const newCarouselImages = req.files.carouselImages || [];
+      let imagesToKeep = campaign.carousel || [];
+
+      // Filter out images marked for deletion
+      if (req.body.carouselImagesToDelete) {
+        const imagesToDelete = JSON.parse(req.body.carouselImagesToDelete);
+
+        // Delete these images from S3
+        for (const imageUrl of imagesToDelete) {
+          const oldImageKey = imageUrl.split(".com/")[1];
+          console.log(oldImageKey);
+          await DeleteImgfromS3(oldImageKey);
+        }
+
+        // Remove deleted images from the imagesToKeep array
+        imagesToKeep = imagesToKeep.filter(
+          (image) => !imagesToDelete.includes(image)
+        );
+      }
+
+      // Upload new carousel images to S3
       const carouselUrls = await Promise.all(
-        carouselImages.map((item) => {
+        newCarouselImages.map((item) => {
           const carouselImageKey = `campaigns/${campaign.id}/carouselImages/${item.originalname}`;
           return UploadImgToS3(
             carouselImageKey,
@@ -205,7 +255,46 @@ exports.UpdateCampaignDetails = async (req, res) => {
           );
         })
       );
-      campaign.carousel = carouselUrls;
+
+      // Set the campaign carousel to include both kept and new images
+      campaign.carousel = [...imagesToKeep, ...carouselUrls];
+    }
+
+    // Update document images if present
+    if (req.files.documentImages || req.body.documentImagesToDelete) {
+      const newDocumentImages = req.files.documentImages || [];
+      let imagesToKeep = campaign.document || [];
+
+      // Filter out images marked for deletion
+      if (req.body.documentImagesToDelete) {
+        const imagesToDelete = JSON.parse(req.body.documentImagesToDelete);
+        // Delete these images from S3
+
+        for (const imageUrl of imagesToDelete) {
+          const oldImageKey = imageUrl.split(".com/")[1];
+          await DeleteImgfromS3(oldImageKey);
+        }
+
+        // Remove deleted images from the imagesToKeep array
+        imagesToKeep = imagesToKeep.filter(
+          (image) => !imagesToDelete.includes(image)
+        );
+      }
+
+      // Upload new document images to S3
+      const documentUrls = await Promise.all(
+        newDocumentImages.map((item) => {
+          const documentImageKey = `campaigns/${campaign.id}/documentImages/${item.originalname}`;
+          return UploadImgToS3(
+            documentImageKey,
+            item.buffer,
+            item.originalname
+          );
+        })
+      );
+
+      // Set the campaign document to include both kept and new images
+      campaign.document = [...imagesToKeep, ...documentUrls];
     }
 
     // Delete images from content
@@ -248,7 +337,7 @@ exports.UploadCampaignImgtoS3 = async (req, res) => {
         .trim()
         .replace(/\s+/g, "-")
         .replace(/[^\w\-]+/g, "")
-        .substring(0, 50);
+        .substring(0, 100);
 
       const campaignImageKey = `campaigns/${campaign.id}/campaignImages/${originalname}`;
 
@@ -336,7 +425,7 @@ exports.DeleteCampaign = async (req, res) => {
     }
 
     // Delete the campaign from the database
-    await campaignModel.findOneAndDelete({  link });
+    await campaignModel.findOneAndDelete({ link });
 
     res
       .status(200)

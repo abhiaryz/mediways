@@ -57,7 +57,9 @@ router.put(
   "/admin/update-campaign-details/:link",
   upload.fields([
     { name: "thumbnail", maxCount: 1 },
+    { name: "qrCode", maxCount: 1 },
     { name: "carouselImages", maxCount: 5 },
+    { name: "documentImages", maxCount: 5 },
   ]),
   UpdateCampaignDetails
 );

@@ -24,13 +24,25 @@ function CampaignDetail() {
     title: "",
     status: "",
     amount: 0,
+    amountDonated: 0,
     beneficiaryName: "",
+    beneficiaryUPI: "",
+    bankAccount: "",
+    IFSC: "",
     content: "",
     thumbnail: "",
     thumbnailPreview: "",
+    qrCode: "",
+    qrCodePreview: "",
     carouselImages: [],
     carouselPreviews: [],
+    documentImages: [],
+    documentPreviews: [],
+    updates: [],
   });
+  const [carouselImagesToDelete, setCarouselImagesToDelete] = useState([]);
+  const [documentImagesToDelete, setDocumentImagesToDelete] = useState([]);
+  const [newUpdate, setNewUpdate] = useState("");
 
   const extractImageUrls = (content) => {
     const tempDiv = document.createElement("div");
@@ -63,10 +75,18 @@ function CampaignDetail() {
           title: campaign.title,
           status: campaign.status,
           amount: campaign.amount,
+          amountDonated: campaign.amountDonated,
           beneficiaryName: campaign.beneficiaryName,
+          beneficiaryUPI: campaign.beneficiaryUPI,
+          bankAccount: campaign.bankAccount,
+          IFSC: campaign.IFSC,
           content: campaign.content,
           thumbnailPreview: campaign.thumbnail,
+          qrCode: campaign.qrCode,
+          qrCodePreview: campaign.qrCode,
           carouselPreviews: campaign.carousel,
+          documentPreviews: campaign.document,
+          updates: campaign.updates,
         }));
         const initialImages = extractImageUrls(campaign.content);
         setInitialImages(initialImages);
@@ -110,7 +130,12 @@ function CampaignDetail() {
       amount: value,
     }));
   };
-
+  const handleAmountDonatedChange = (value) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      amountDonated: value,
+    }));
+  };
   const handleThumbnailChange = (event) => {
     const file = event.target.files[0];
     setFormData((prevFormData) => ({
@@ -119,7 +144,14 @@ function CampaignDetail() {
       thumbnailPreview: URL.createObjectURL(file),
     }));
   };
-
+  const handleqrCodeChange = (event) => {
+    const file = event.target.files[0];
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      qrCode: file,
+      qrCodePreview: URL.createObjectURL(file),
+    }));
+  };
   const handleCarouselImagesChange = (event) => {
     const files = Array.from(event.target.files);
     const carouselPreviews = files.map((file) => URL.createObjectURL(file));
@@ -130,8 +162,20 @@ function CampaignDetail() {
     }));
   };
 
+  const handleDocumentImageChange = (event) => {
+    const files = Array.from(event.target.files);
+    const documentPreviews = files.map((file) => URL.createObjectURL(file));
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      documentImages: [...prevFormData.documentImages, ...files],
+      documentPreviews: [...prevFormData.documentPreviews, ...documentPreviews],
+    }));
+  };
   const removeCarouselImage = (index) => {
     setFormData((prevFormData) => {
+      const imageToDelete = prevFormData.carouselPreviews[index];
+      setCarouselImagesToDelete((prev) => [...prev, imageToDelete]);
+
       const newCarouselImages = prevFormData.carouselImages.filter(
         (image, i) => i !== index
       );
@@ -144,6 +188,50 @@ function CampaignDetail() {
         carouselPreviews: newCarouselPreviews,
       };
     });
+  };
+
+  const removeDocumentImage = (index) => {
+    setFormData((prevFormData) => {
+      const imageToDelete = prevFormData.documentPreviews[index];
+      setDocumentImagesToDelete((prev) => [...prev, imageToDelete]);
+
+      const newDocumentImages = prevFormData.documentImages.filter(
+        (image, i) => i !== index
+      );
+      const newDocumentPreviews = prevFormData.documentPreviews.filter(
+        (preview, i) => i !== index
+      );
+      return {
+        ...prevFormData,
+        documentImages: newDocumentImages,
+        documentPreviews: newDocumentPreviews,
+      };
+    });
+  };
+  const handleAddUpdate = () => {
+    if (newUpdate.trim() !== "") {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        updates: [...(prevFormData.updates || []), newUpdate],
+      }));
+      setNewUpdate("");
+    }
+  };
+
+  const handleEditUpdate = (index, updatedText) => {
+    const updatedUpdates = [...(formData.updates || [])];
+    updatedUpdates[index] = updatedText;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      updates: updatedUpdates,
+    }));
+  };
+
+  const handleRemoveUpdate = (index) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      updates: (prevFormData.updates || []).filter((_, i) => i !== index),
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -171,18 +259,44 @@ function CampaignDetail() {
     formDataToSend.append("title", formData.title);
     formDataToSend.append("status", formData.status);
     formDataToSend.append("amount", formData.amount);
+    formDataToSend.append("amountDonated", formData.amountDonated);
+    formDataToSend.append("bankAccount", formData.bankAccount);
+    formDataToSend.append("IFSC", formData.IFSC);
+
     formDataToSend.append("beneficiaryName", formData.beneficiaryName);
+    formDataToSend.append("beneficiaryUPI", formData.beneficiaryUPI);
+    formDataToSend.append("updates", JSON.stringify(formData.updates));
+
     formDataToSend.append("content", formData.content);
 
     if (formData.thumbnail) {
       formDataToSend.append("thumbnail", formData.thumbnail);
     }
+    if (formData.qrCode) {
+      formDataToSend.append("qrCode", formData.qrCode);
+    }
     for (let i = 0; i < formData.carouselImages.length; i++) {
       formDataToSend.append("carouselImages", formData.carouselImages[i]);
     }
-    if (imagesToDelete) {
+    for (let i = 0; i < formData.documentImages.length; i++) {
+      formDataToSend.append("documentImages", formData.documentImages[i]);
+    }
+    if (imagesToDelete.length > 0) {
       formDataToSend.append("imagesToDelete", JSON.stringify(imagesToDelete));
     }
+    if (carouselImagesToDelete.length > 0) {
+      formDataToSend.append(
+        "carouselImagesToDelete",
+        JSON.stringify(carouselImagesToDelete)
+      );
+    }
+    if (documentImagesToDelete.length > 0) {
+      formDataToSend.append(
+        "documentImagesToDelete",
+        JSON.stringify(documentImagesToDelete)
+      );
+    }
+
     try {
       const response = await axios.put(
         `${
@@ -259,6 +373,7 @@ function CampaignDetail() {
       setLoading(false);
     }
   };
+
   return (
     <>
       <NotificationContainer />
@@ -291,87 +406,278 @@ function CampaignDetail() {
               onChange={updateToggleValue}
             />
           </label>
-          <input
-            type="number"
-            value={formData.amount}
-            placeholder="Enter Campaign Amount"
-            onChange={(e) => handleAmountChange(e.target.value)}
-            className="input input-bordered w-full"
-            style={{
-              // Chrome, Safari, Edge, Opera
-              appearance: "textfield",
-              // Firefox
-              MozAppearance: "textfield",
-              // Internet Explorer 10+
-              MsAppearance: "textfield",
-            }}
-          />
+
           <div className="form-control flex flex-col gap-2">
             <label className="label">
-              <span className="label-text">Upload Thumbnail Image</span>
-            </label>{" "}
+              <span className="label-text">Total donation amount</span>
+            </label>
             <input
-              type="file"
-              accept="image/*"
-              onChange={handleThumbnailChange}
+              type="number"
+              value={formData.amount}
+              placeholder="Enter Campaign Amount"
+              onChange={(e) => handleAmountChange(e.target.value)}
               className="input input-bordered w-full"
-            />{" "}
-            {formData.thumbnailPreview && (
-              <div>
-                <img
-                  src={formData.thumbnailPreview}
-                  alt="Thumbnail Preview"
-                  className="w-1/5 h-auto mt-4"
-                />
-              </div>
-            )}
+              style={{
+                // Chrome, Safari, Edge, Opera
+                appearance: "textfield",
+                // Firefox
+                MozAppearance: "textfield",
+                // Internet Explorer 10+
+                MsAppearance: "textfield",
+              }}
+            />
           </div>
 
           <div className="form-control flex flex-col gap-2">
             <label className="label">
-              <span className="label-text">Upload Carousel Images (1-5)</span>
-            </label>{" "}
+              <span className="label-text">Amount donated till now</span>
+            </label>
             <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleCarouselImagesChange}
+              type="number"
+              value={formData.amountDonated}
+              placeholder="Enter amount donated till now"
+              onChange={(e) => handleAmountDonatedChange(e.target.value)}
               className="input input-bordered w-full"
+              style={{
+                // Chrome, Safari, Edge, Opera
+                appearance: "textfield",
+                // Firefox
+                MozAppearance: "textfield",
+                // Internet Explorer 10+
+                MsAppearance: "textfield",
+              }}
             />
-            {formData.carouselPreviews &&
-              formData.carouselPreviews.length > 0 && (
-                <div className="w-full mt-4 flex flex-wrap gap-2">
-                  {formData.carouselPreviews.map((preview, index) => (
-                    <div key={index} className="relative flex w-1/3">
-                      <img
-                        src={preview}
-                        alt={`Carousel Preview ${index + 1}`}
-                        className="border w-full h-auto"
+          </div>
+
+          <div className="collapse collapse-arrow">
+            <input type="checkbox" />
+            <div className="collapse-title text-lg text-white font-semibold bg-[#00367d]">
+              Payment Details
+            </div>
+            <div className="collapse-content p-4">
+              <InputText
+                type="text"
+                defaultValue={formData.beneficiaryUPI}
+                updateType="beneficiaryUPI"
+                labelTitle="1 . Enter Beneficiary UPI ID"
+                updateFormValue={handleFormData}
+              />
+              <div className="form-control flex flex-col gap-2">
+                <label className="label">
+                  <span className="label-text">
+                    2 .Upload UPI QR Code Image
+                  </span>
+                </label>{" "}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleqrCodeChange}
+                  className="input input-bordered w-full"
+                />{" "}
+                {formData.qrCodePreview && (
+                  <div>
+                    <img
+                      src={formData.qrCodePreview}
+                      alt="QR Code Preview"
+                      className="w-1/5 h-auto mt-4"
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="form-control flex flex-col gap-2">
+                <label className="label">
+                  <span className="label-text">
+                    3 . Bank Account and IFSC details
+                  </span>
+                </label>
+                <InputText
+                  type="text"
+                  defaultValue={formData.bankAccount}
+                  updateType="bankAccount"
+                  labelTitle="Enter Beneficiary Bank Account Number"
+                  updateFormValue={handleFormData}
+                />{" "}
+                <InputText
+                  type="text"
+                  defaultValue={formData.IFSC}
+                  updateType="IFSC"
+                  labelTitle="Enter Beneficiary IFSC code"
+                  updateFormValue={handleFormData}
+                />
+              </div>{" "}
+            </div>
+          </div>
+
+          <div className="collapse collapse-arrow">
+            <input type="checkbox" />
+            <div className="collapse-title text-lg text-white font-semibold bg-[#00367d]">
+              Image Uploads
+            </div>
+            <div className="collapse-content p-4">
+              <div className="form-control flex flex-col gap-2">
+                <label className="label">
+                  <span className="label-text">Upload Thumbnail Image</span>
+                </label>{" "}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleThumbnailChange}
+                  className="input input-bordered w-full"
+                />{" "}
+                {formData.thumbnailPreview && (
+                  <div>
+                    <img
+                      src={formData.thumbnailPreview}
+                      alt="Thumbnail Preview"
+                      className="w-1/5 h-auto mt-4"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="form-control flex flex-col gap-2">
+                <label className="label">
+                  <span className="label-text">
+                    Upload Carousel Images (1-5)
+                  </span>
+                </label>{" "}
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleCarouselImagesChange}
+                  className="input input-bordered w-full"
+                />
+                {formData.carouselPreviews &&
+                  formData.carouselPreviews.length > 0 && (
+                    <div className="w-full mt-4 flex flex-wrap gap-2">
+                      {formData.carouselPreviews.map((preview, index) => (
+                        <div key={index} className="relative flex w-1/3">
+                          <img
+                            src={preview}
+                            alt={`Carousel Preview ${index + 1}`}
+                            className="border w-full h-auto"
+                          />
+                          <button
+                            className="absolute top-0 right-0 bg-red-600 text-white rounded-full p-1"
+                            onClick={() => removeCarouselImage(index)}
+                          >
+                            X
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+              </div>
+              <div className="form-control flex flex-col gap-2">
+                <label className="label">
+                  <span className="label-text">
+                    Upload Document Images (1-5)
+                  </span>
+                </label>{" "}
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleDocumentImageChange}
+                  className="input input-bordered w-full"
+                />
+                {formData.documentPreviews &&
+                  formData.documentPreviews.length > 0 && (
+                    <div className="w-full mt-4 flex flex-wrap gap-2">
+                      {formData.documentPreviews.map((preview, index) => (
+                        <div key={index} className="relative flex w-1/3">
+                          <img
+                            src={preview}
+                            alt={`Document Preview ${index + 1}`}
+                            className="border w-full h-auto"
+                          />
+                          <button
+                            className="absolute top-0 right-0 bg-red-600 text-white rounded-full p-1"
+                            onClick={() => removeDocumentImage(index)}
+                          >
+                            X
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+              </div>
+            </div>
+          </div>
+
+          <div className="collapse collapse-arrow">
+            <input type="checkbox" />
+            <div className="collapse-title text-lg text-white font-semibold bg-[#00367d]">
+              Content
+            </div>
+            <div className="collapse-content p-4">
+              <FormikRichText
+                id="description"
+                name="description"
+                label="Description"
+                value={formData.content}
+                setValue={(content) =>
+                  setFormData((prevFormData) => ({
+                    ...prevFormData,
+                    content: content,
+                  }))
+                }
+              />{" "}
+            </div>
+          </div>
+          <div className="collapse collapse-arrow">
+            <input type="checkbox" />
+            <div className="collapse-title text-lg text-white font-semibold bg-[#00367d]">
+              Updates
+            </div>
+            <div className="collapse-content p-4">
+              <div className="form-control flex flex-col gap-2">
+                <label className="label">
+                  <span className="label-text">Updates</span>
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newUpdate}
+                    onChange={(e) => setNewUpdate(e.target.value)}
+                    className="input input-bordered w-full"
+                    placeholder="Add a new update"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddUpdate}
+                    className="btn btn-primary"
+                  >
+                    Add Update
+                  </button>
+                </div>
+              </div>
+              {formData.updates && formData.updates.length > 0 && (
+                <div className="w-full mt-4 flex flex-col gap-2">
+                  {formData.updates.map((update, index) => (
+                    <div key={index} className="flex gap-2 items-center">
+                      <input
+                        type="text"
+                        value={update}
+                        onChange={(e) =>
+                          handleEditUpdate(index, e.target.value)
+                        }
+                        className="input input-bordered w-full"
                       />
                       <button
-                        className="absolute top-0 right-0 bg-red-600 text-white rounded-full p-1"
-                        onClick={() => removeCarouselImage(index)}
+                        type="button"
+                        onClick={() => handleRemoveUpdate(index)}
+                        className="btn btn-danger"
                       >
-                        X
+                        Remove
                       </button>
                     </div>
                   ))}
                 </div>
               )}
+            </div>
           </div>
-
-          <FormikRichText
-            id="description"
-            name="description"
-            label="Description"
-            value={formData.content}
-            setValue={(content) =>
-              setFormData((prevFormData) => ({
-                ...prevFormData,
-                content: content,
-              }))
-            }
-          />
 
           <ErrorText styleClass="mt-8">{errorMessage}</ErrorText>
           <button
