@@ -170,6 +170,11 @@ exports.UpdateCampaignDetails = async (req, res) => {
       .replace(/[^\w\-]+/g, "")
       .substring(0, 100);
 
+    parsedupdates = JSON.parse(updates);
+    formatedupdates = {
+      parsedupdates,
+      datetime: moment().format("MMMM Do YYYY, h:mm:ss a"),
+    };
     // Update text fields
     campaign.link = link;
     campaign.title = title;
@@ -180,7 +185,7 @@ exports.UpdateCampaignDetails = async (req, res) => {
     campaign.beneficiaryUPI = beneficiaryUPI;
     campaign.bankAccount = bankAccount;
     campaign.IFSC = IFSC;
-    campaign.updates = JSON.parse(updates);
+    campaign.updates = formatedupdates;
     campaign.content = content;
     campaign.lastUpdate = moment().format("MMMM Do YYYY, h:mm:ss a");
 
@@ -234,7 +239,6 @@ exports.UpdateCampaignDetails = async (req, res) => {
         // Delete these images from S3
         for (const imageUrl of imagesToDelete) {
           const oldImageKey = imageUrl.split(".com/")[1];
-          console.log(oldImageKey);
           await DeleteImgfromS3(oldImageKey);
         }
 
