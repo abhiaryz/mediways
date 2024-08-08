@@ -62,7 +62,7 @@ const campaignSchema = new mongoose.Schema({
     default: [],
   },
   updates: {
-    type: [Object], // Array of strings to store image URLs
+    type: [Object], // Array of objects to store image URLs
     default: [],
   },
   content: {

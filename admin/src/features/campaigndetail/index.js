@@ -42,8 +42,9 @@ function CampaignDetail() {
   });
   const [carouselImagesToDelete, setCarouselImagesToDelete] = useState([]);
   const [documentImagesToDelete, setDocumentImagesToDelete] = useState([]);
-  const [newUpdate, setNewUpdate] = useState("");
-
+  const [newUpdateText, setNewUpdateText] = useState("");
+  const [newUpdateDate, setNewUpdateDate] = useState("");
+  
   const extractImageUrls = (content) => {
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = content;
@@ -209,18 +210,22 @@ function CampaignDetail() {
     });
   };
   const handleAddUpdate = () => {
-    if (newUpdate.trim() !== "") {
+    if (newUpdateText.trim() !== "" && newUpdateDate !== "") {
       setFormData((prevFormData) => ({
         ...prevFormData,
-        updates: [...(prevFormData.updates || []), newUpdate],
+        updates: [
+          ...prevFormData.updates,
+          { text: newUpdateText, date: newUpdateDate },
+        ],
       }));
-      setNewUpdate("");
+      setNewUpdateText("");
+      setNewUpdateDate("");
     }
   };
 
-  const handleEditUpdate = (index, updatedText) => {
-    const updatedUpdates = [...(formData.updates || [])];
-    updatedUpdates[index] = updatedText;
+  const handleEditUpdate = (index, updatedText, updatedDate) => {
+    const updatedUpdates = [...formData.updates];
+    updatedUpdates[index] = { text: updatedText, date: updatedDate };
     setFormData((prevFormData) => ({
       ...prevFormData,
       updates: updatedUpdates,
@@ -230,7 +235,7 @@ function CampaignDetail() {
   const handleRemoveUpdate = (index) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
-      updates: (prevFormData.updates || []).filter((_, i) => i !== index),
+      updates: prevFormData.updates.filter((_, i) => i !== index),
     }));
   };
 
@@ -639,10 +644,16 @@ function CampaignDetail() {
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    value={newUpdate}
-                    onChange={(e) => setNewUpdate(e.target.value)}
+                    value={newUpdateText}
+                    onChange={(e) => setNewUpdateText(e.target.value)}
                     className="input input-bordered w-full"
                     placeholder="Add a new update"
+                  />
+                  <input
+                    type="date"
+                    value={newUpdateDate}
+                    onChange={(e) => setNewUpdateDate(e.target.value)}
+                    className="input input-bordered w-full"
                   />
                   <button
                     type="button"
@@ -653,15 +664,24 @@ function CampaignDetail() {
                   </button>
                 </div>
               </div>
+
               {formData.updates && formData.updates.length > 0 && (
                 <div className="w-full mt-4 flex flex-col gap-2">
                   {formData.updates.map((update, index) => (
                     <div key={index} className="flex gap-2 items-center">
                       <input
                         type="text"
-                        value={update}
+                        value={update.text}
                         onChange={(e) =>
-                          handleEditUpdate(index, e.target.value)
+                          handleEditUpdate(index, e.target.value, update.date)
+                        }
+                        className="input input-bordered w-full"
+                      />
+                      <input
+                        type="date"
+                        value={update.date}
+                        onChange={(e) =>
+                          handleEditUpdate(index, update.text, e.target.value)
                         }
                         className="input input-bordered w-full"
                       />

@@ -199,6 +199,7 @@ export const FooterData = [
     ],
   },
 ];
+
 export const AboutData = [
   {
     id: 0,

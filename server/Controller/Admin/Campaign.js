@@ -171,10 +171,7 @@ exports.UpdateCampaignDetails = async (req, res) => {
       .substring(0, 100);
 
     parsedupdates = JSON.parse(updates);
-    formatedupdates = {
-      parsedupdates,
-      datetime: moment().format("MMMM Do YYYY, h:mm:ss a"),
-    };
+
     // Update text fields
     campaign.link = link;
     campaign.title = title;
@@ -185,7 +182,7 @@ exports.UpdateCampaignDetails = async (req, res) => {
     campaign.beneficiaryUPI = beneficiaryUPI;
     campaign.bankAccount = bankAccount;
     campaign.IFSC = IFSC;
-    campaign.updates = formatedupdates;
+    campaign.updates = parsedupdates;
     campaign.content = content;
     campaign.lastUpdate = moment().format("MMMM Do YYYY, h:mm:ss a");
 
