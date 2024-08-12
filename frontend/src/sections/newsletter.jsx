@@ -24,7 +24,7 @@ const NewsLetter = () => {
           </div>
         </div>
         <div className="flex flex-col justify-end pt-4 lg:flex-1 lg:flex-row lg:pt-0">
-          <img src="doctor.png" className="relative top-[20px]" />
+          <img src="doctor-ind.png" className="relative top-[20px]" />
         </div>
       </div>
     </div>

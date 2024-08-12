@@ -5,6 +5,8 @@ export default {
     extend: {
       colors: {
         darkBlue: "#000A2D",
+
+        // lightBlue: "#3267FF",
         lightBlue: "#00367d",
         skyBlue: "#2087FF",
         muted: "#636571",

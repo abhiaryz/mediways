@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
@@ -7,7 +7,7 @@ import { Heading } from "../components";
 import PersonIcon from "@mui/icons-material/Person";
 import PhoneIcon from "@mui/icons-material/Phone";
 import EmailIcon from "@mui/icons-material/Email";
-import MessageIcon from "@mui/icons-material/Message";
+
 import { BsYoutube, BsLinkedin, BsTwitterX } from "react-icons/bs";
 
 const Contact = () => {
@@ -70,6 +70,7 @@ const Contact = () => {
     setLoading(true);
 
     try {
+      // eslint-disable-next-line no-unused-vars
       const response = await axios.post(
         `https://mediways-server.vercel.app/user/submit-form`,
         formData,
@@ -110,7 +111,7 @@ const Contact = () => {
               />
             </svg>
           </div>
-          <p className="text-xl font-medium family-sora">Email Us</p>
+          <p className="family-sora text-xl font-medium">Email Us</p>
           <p className="family-sora">
             Ask anything by emailing us and we’ll respond within a few days.
           </p>
@@ -148,7 +149,7 @@ const Contact = () => {
               />
             </svg>
           </div>
-          <p className="text-xl font-medium family-sora">Call Us Any Time</p>
+          <p className="family-sora text-xl font-medium">Call Us Any Time</p>
           <p className="family-sora">
             Call us if your question requires an immediate response.
           </p>
@@ -186,7 +187,7 @@ const Contact = () => {
               />
             </svg>
           </div>
-          <p className="text-xl font-medium family-sora">Social Media</p>
+          <p className="family-sora text-xl font-medium">Social Media</p>
           <p className="family-sora">
             Connect with our social media handles for latest updates
           </p>

@@ -1,5 +1,6 @@
 import { FooterCol } from "../components";
 import { BsYoutube, BsLinkedin, BsTwitterX } from "react-icons/bs";
+import logo from "../../public/logo.png";
 
 const Footer = () => {
   return (
@@ -9,7 +10,7 @@ const Footer = () => {
           Logo
         </h1> */}
         <img
-          src="logo.png"
+          src={logo}
           className="h-[26rem] w-[16rem] object-contain lg:relative lg:right-10"
         />
         <p className="family-inter relative bottom-32 mx-auto text-center text-[1rem] font-normal text-white/60 md:bottom-16 md:text-left lg:pr-10">

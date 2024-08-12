@@ -1,9 +1,7 @@
-import { FaLink, FaWhatsapp, FaHeart } from "react-icons/fa";
-
 // eslint-disable-next-line react/prop-types
 const AboutCard = ({ title, desc, img }) => {
   return (
-    <div className="h-content mt-4 w-full md:max-w-[30%] rounded-lg border shadow-lg shadow-black/20">
+    <div className="h-content mt-4 w-full rounded-lg border shadow-lg shadow-black/20 md:max-w-[30%]">
       <div className="overflow-hidden rounded-t-lg">
         <img
           src={img}
@@ -14,9 +12,7 @@ const AboutCard = ({ title, desc, img }) => {
         <h1 className="family-sora text-[1.2rem] font-semibold text-darkBlue">
           {title}
         </h1>
-        <p className="familt-sora">
-            {desc}
-        </p>
+        <p className="familt-sora">{desc}</p>
       </div>
     </div>
   );

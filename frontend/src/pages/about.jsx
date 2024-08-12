@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
 import { Heading } from "../components";
 import { AboutData } from "../data";
 import AboutCard from "../components/about-card";
 
 const About = () => {
   return (
-    <div className="pt-24">
+    <div className="overflow-hidden pt-24">
       <div className="relative">
         <div className="">
           <img
@@ -34,7 +33,7 @@ const About = () => {
           <p className="family-sora">
             Welcome to Mediways! your trusted partner in global healthcare
             solutions. We understand that seeking medical treatment away from
-            home can be a daunting prospect, which is why we're here to guide
+            home can be a daunting prospect, which is why we are here to guide
             you every step of the way.
             <br />
             <br /> At Mediways Asia, we are committed to providing personalized
@@ -52,7 +51,12 @@ const About = () => {
           </p>
           <div className="flex w-full flex-col flex-wrap gap-6 md:flex-row">
             {AboutData.map((item, index) => (
-              <AboutCard title={item.title} desc={item.desc} img={item.img} />
+              <AboutCard
+                key={index}
+                title={item.title}
+                desc={item.desc}
+                img={item.img}
+              />
             ))}
           </div>
         </div>

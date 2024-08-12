@@ -1,4 +1,4 @@
-import ProcessDesign from "../../public/Processdesign.jpg";
+import ProcessDesign from "../../public/line.png";
 import ProcessMobile from "../../public/Processmobile.jpg";
 import { Heading } from "../components";
 

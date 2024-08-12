@@ -6,6 +6,8 @@ import {
   SpecialitiesPage,
   Campaign,
   CampaignDetails,
+  Services,
+  faq,
 } from "./pages";
 import { Navbar } from "./components";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
@@ -13,8 +15,6 @@ import { useEffect } from "react";
 import { Footer } from "./sections";
 
 import axios from "axios";
-import Services from "./pages/services";
-import Faq from "./pages/faq";
 
 export const callAPI = async () => {
   try {
@@ -85,13 +85,12 @@ function App() {
         <Route path="/" Component={Home} />
         <Route path="/contact" Component={Contact} />
         <Route path="/about" Component={About} />
-        <Route path="/services" Component={Services} />
-        <Route path="/faq" Component={Faq} />
-
         {/* <Route path="/specialities" Component={SpecialitiesPage} /> */}
         <Route path="/specialities/:link" Component={SpecialitiesPage} />
         <Route path="/campaigns" Component={Campaign} />
         <Route path="/campaigns/:link" Component={CampaignDetails} />
+        <Route path="/services" Component={Services} />
+        <Route path="/faqs" Component={faq} />
       </Routes>
       <Footer />
     </Router>

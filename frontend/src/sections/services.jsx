@@ -14,7 +14,8 @@ const Services = () => {
       const response = await axios.get(
         "https://mediways-server.vercel.app/user/get-all-services",
       );
-      setServicesData(response.data.services);
+      const firstFive = response.data.services.slice(0, 5);
+      setServicesData(firstFive);
     };
 
     fetchData();

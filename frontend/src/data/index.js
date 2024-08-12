@@ -16,8 +16,8 @@ export const NavbarData = [
   },
   {
     id: 3,
-    title: "Specialities",
-    link: "/specialities/heart-transplant",
+    title: "Specialities ",
+    link: "#",
     dropdown: true,
   },
   {
@@ -200,34 +200,52 @@ export const FooterData = [
   },
 ];
 
+export const CampDetail = [
+  {
+    id: 0,
+    title: "Details",
+    link: "details",
+  },
+  {
+    id: 1,
+    title: "Documents",
+    link: "documents",
+  },
+  {
+    id: 2,
+    title: "Updates",
+    link: "updates",
+  },
+];
+
 export const AboutData = [
   {
     id: 0,
-    img: "/public/about/card1.png",
+    img: "/public/about/card1.jpg",
     title: "Expertise",
     desc: "Our team comprises seasoned professionals with extensive knowledge of the healthcare landscape, enabling us to match you with the most suitable medical facilities and specialists for your needs.",
   },
   {
     id: 1,
-    img: "/public/about/card1.png",
+    img: "/public/about/card1.jpg",
     title: "Personalized Care",
     desc: "We recognize that every patient is unique, which is why we take the time to understand your individual requirements and preferences. Your journey with us is tailored to suit your specific medical condition, budget, and timeline.",
   },
   {
     id: 2,
-    img: "/public/about/card1.png",
+    img: "/public/about/card1.jpg",
     title: "Quality Assurance",
     desc: "We partner with accredited hospitals and clinics that uphold the highest standards of medical care and patient safety. Rest assured, you'll receive top-notch treatment in state-of-the-art facilities.",
   },
   {
     id: 3,
-    img: "/public/about/card1.png",
+    img: "/public/about/card1.jpg",
     title: "Transparent Pricing",
     desc: "We believe in transparency when it comes to pricing. Our comprehensive packages outline all costs upfront, so you can make informed decisions without any hidden surprises.",
   },
   {
     id: 4,
-    img: "/public/about/card1.png",
+    img: "/public/about/card1.jpg",
     title: "Support Every Step of the Way",
     desc: " From visa assistance to travel arrangements and accommodation, we handle all logistical aspects of your medical trip, allowing you to focus solely on your health and recovery.",
   },

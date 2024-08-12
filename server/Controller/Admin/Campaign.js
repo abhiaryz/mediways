@@ -416,7 +416,11 @@ exports.DeleteCampaign = async (req, res) => {
       const thumbnailKey = campaign.thumbnail.split(".com/")[1];
       await DeleteImgfromS3(thumbnailKey);
     }
-
+    // Delete QR Code from S3
+    if (campaign.qrCode) {
+      const qrCodeKey = campaign.qrCode.split(".com/")[1];
+      await DeleteImgfromS3(qrCodeKey);
+    }
     // Delete carousel images from S3
     for (const carousel of campaign.carousel) {
       if (carousel) {
@@ -424,7 +428,12 @@ exports.DeleteCampaign = async (req, res) => {
         await DeleteImgfromS3(carouselKey);
       }
     }
-
+    for (const document of campaign.document) {
+      if (document) {
+        const documentKey = document.split(".com/")[1];
+        await DeleteImgfromS3(documentKey);
+      }
+    }
     // Delete the campaign from the database
     await campaignModel.findOneAndDelete({ link });
 
