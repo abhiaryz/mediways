@@ -5,11 +5,14 @@ import axios from "axios";
 import { Breadcrumbs, Typography } from "@mui/material";
 import { callAPI } from "../App";
 import parse from "html-react-parser";
+import Loading from "react-loading";
 
 const SpecialitiesPage = () => {
   const [detailData, setDetailData] = useState();
 
   const [parsedData, setParsedData] = useState(null);
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const { link } = useParams();
 
@@ -39,13 +42,22 @@ const SpecialitiesPage = () => {
 
   useEffect(() => {
     const fetchDetailedData = async () => {
-      if (link) {
-        const response = await axios.get(
-          `https://mediways-server.vercel.app/user/get-speciality-details/${link}`,
-        );
-        await setDetailData(response.data.speciality);
+      setIsLoading(true);
+      try {
+        if (link) {
+          const response = await axios.get(
+            `https://mediways-server.vercel.app/user/get-speciality-details/${link}`,
+          );
+          await setDetailData(response.data.speciality);
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setIsLoading(false);
       }
     };
+
+    console.log(isLoading);
 
     fetchDetailedData();
   }, [link]);
@@ -73,6 +85,7 @@ const SpecialitiesPage = () => {
       </aside>
       <div className="h-full p-5">
         <Breadcrumbs aria-label="breadcrumb" separator="›">
+          {isLoading && <h1>Hello</h1>}
           <h1 onClick={() => navigate("/")} className="cursor-pointer">
             Home
           </h1>
@@ -81,6 +94,11 @@ const SpecialitiesPage = () => {
           </h1>
           <Typography color="text.primary">{capitalizeWords(link)}</Typography>
         </Breadcrumbs>
+        {isLoading && (
+          <div className="flex h-screen items-center justify-center">
+            <Loading type="spin" color="#00367d" height={42} width={42} />
+          </div>
+        )}
         <h1 className="family-sora py-2 text-[2.5rem] font-semibold md:text-[3.5rem]">
           {detailData?.title}
         </h1>
