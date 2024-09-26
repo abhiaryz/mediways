@@ -22,15 +22,12 @@ const campaignSchema = new mongoose.Schema({
   },
   beneficiaryUPI: {
     type: String,
-    required: true,
   },
   bankAccount: {
     type: String,
-    required: true,
   },
   IFSC: {
     type: String,
-    required: true,
   },
   status: {
     type: String,
@@ -43,7 +40,6 @@ const campaignSchema = new mongoose.Schema({
   },
   amountDonated: {
     type: Number,
-    required: true,
   },
   thumbnail: {
     type: String, // Assuming this will store the image URL
@@ -51,7 +47,6 @@ const campaignSchema = new mongoose.Schema({
   },
   qrCode: {
     type: String, // Assuming this will store the image URL
-    required: true,
   },
   carousel: {
     type: [String], // Array of strings to store image URLs
