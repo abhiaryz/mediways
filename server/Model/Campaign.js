@@ -40,6 +40,7 @@ const campaignSchema = new mongoose.Schema({
   },
   amountDonated: {
     type: Number,
+    default: 0,
   },
   thumbnail: {
     type: String, // Assuming this will store the image URL
