@@ -72,6 +72,24 @@ const campaignSchema = new mongoose.Schema({
     type: String,
     default: () => moment().format("MMMM Do YYYY, h:mm:ss a"),
   },
+  taxBenefit: {
+    isTaxBenefit: {
+      type: Boolean,
+      default: false,
+    },
+    types: [{
+      name: String,
+      desc: String,
+    }],
+  },
+});
+
+// Add a pre-save hook to ensure types is empty when isTaxBenefit is false
+campaignSchema.pre('save', function(next) {
+  if (this.taxBenefit.isTaxBenefit === false) {
+    this.taxBenefit.types = [];
+  }
+  next();
 });
 
 const Campaign = mongoose.model("Campaign", campaignSchema);

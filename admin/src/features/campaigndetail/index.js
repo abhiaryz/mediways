@@ -11,6 +11,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import FormikRichText from "../../components/RichText/CampaignRichText";
+import ToogleInput from "../../components/Input/ToogleInput";
 
 function CampaignDetail() {
   const navigate = useNavigate();
@@ -39,12 +40,16 @@ function CampaignDetail() {
     documentImages: [],
     documentPreviews: [],
     updates: [],
+    taxBenefit: {
+      isTaxBenefit: false,
+      types: []
+    },
   });
   const [carouselImagesToDelete, setCarouselImagesToDelete] = useState([]);
   const [documentImagesToDelete, setDocumentImagesToDelete] = useState([]);
   const [newUpdateText, setNewUpdateText] = useState("");
   const [newUpdateDate, setNewUpdateDate] = useState("");
-  
+
   const extractImageUrls = (content) => {
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = content;
@@ -88,6 +93,7 @@ function CampaignDetail() {
           carouselPreviews: campaign.carousel,
           documentPreviews: campaign.document,
           updates: campaign.updates,
+          taxBenefit: campaign.taxBenefit || { isTaxBenefit: false, types: [] },
         }));
         const initialImages = extractImageUrls(campaign.content);
         setInitialImages(initialImages);
@@ -239,6 +245,48 @@ function CampaignDetail() {
     }));
   };
 
+  const handleTaxBenefitToggle = (value) => {
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      taxBenefit: {
+        ...prevFormData.taxBenefit,
+        isTaxBenefit: value,
+        types: value ? prevFormData.taxBenefit.types : []
+      }
+    }));
+  };
+
+  const handleTypeChange = (index, field, value) => {
+    setFormData(prevFormData => {
+      const newTypes = [...prevFormData.taxBenefit.types];
+      newTypes[index] = { ...newTypes[index], [field]: value };
+      return {
+        ...prevFormData,
+        taxBenefit: { ...prevFormData.taxBenefit, types: newTypes }
+      };
+    });
+  };
+
+  const addType = () => {
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      taxBenefit: {
+        ...prevFormData.taxBenefit,
+        types: [...prevFormData.taxBenefit.types, { name: '', desc: '' }]
+      }
+    }));
+  };
+
+  const removeType = (index) => {
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      taxBenefit: {
+        ...prevFormData.taxBenefit,
+        types: prevFormData.taxBenefit.types.filter((_, i) => i !== index)
+      }
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
@@ -271,7 +319,7 @@ function CampaignDetail() {
     formDataToSend.append("beneficiaryName", formData.beneficiaryName);
     formDataToSend.append("beneficiaryUPI", formData.beneficiaryUPI);
     formDataToSend.append("updates", JSON.stringify(formData.updates));
-
+    formDataToSend.append("taxBenefit", JSON.stringify(formData.taxBenefit));
     formDataToSend.append("content", formData.content);
 
     if (formData.thumbnail) {
@@ -694,6 +742,46 @@ function CampaignDetail() {
                       </button>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="collapse collapse-arrow">
+            <input type="checkbox" />
+            <div className="collapse-title text-lg text-white font-semibold bg-[#00367d]">
+              Tax Benefit
+            </div>
+            <div className="collapse-content p-4">
+              <ToogleInput
+                labelTitle="Tax Benefit"
+                defaultValue={formData.taxBenefit.isTaxBenefit}
+                updateFormValue={({ value }) => handleTaxBenefitToggle(value)}
+              />
+
+              {formData.taxBenefit.isTaxBenefit && (
+                <div>
+                  <h3 className="mt-4 mb-2 font-semibold">Tax Benefit Types</h3>
+                  {formData.taxBenefit.types.map((type, index) => (
+                    <div key={index} className="mb-4 flex items-center space-x-2">
+                      <input
+                        type="text"
+                        value={type.name}
+                        onChange={(e) => handleTypeChange(index, 'name', e.target.value)}
+                        placeholder="Name"
+                        className="input input-bordered w-1/3"
+                      />
+                      <input
+                        type="text"
+                        value={type.desc}
+                        onChange={(e) => handleTypeChange(index, 'desc', e.target.value)}
+                        placeholder="Description"
+                        className="input input-bordered w-1/2"
+                      />
+                      <button onClick={() => removeType(index)} className="btn btn-error btn-sm">Remove</button>
+                    </div>
+                  ))}
+                  <button onClick={addType} className="btn btn-primary btn-sm">Add Type</button>
                 </div>
               )}
             </div>

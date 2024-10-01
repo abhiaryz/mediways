@@ -155,6 +155,7 @@ exports.UpdateCampaignDetails = async (req, res) => {
     updates,
     content,
     imagesToDelete,
+    taxBenefit,
   } = req.body;
 
   try {
@@ -171,7 +172,7 @@ exports.UpdateCampaignDetails = async (req, res) => {
       .substring(0, 100);
 
     parsedupdates = JSON.parse(updates);
-
+    parsedtaxBenefit = JSON.parse(taxBenefit);
     // Update text fields
     campaign.link = link;
     campaign.title = title;
@@ -184,6 +185,7 @@ exports.UpdateCampaignDetails = async (req, res) => {
     campaign.IFSC = IFSC;
     campaign.updates = parsedupdates;
     campaign.content = content;
+    campaign.taxBenefit = parsedtaxBenefit;
     campaign.lastUpdate = moment().format("MMMM Do YYYY, h:mm:ss a");
 
     // Update thumbnail if present
