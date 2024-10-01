@@ -113,7 +113,7 @@ exports.CampaignNew = async (req, res, next) => {
 
 exports.GetAllCampaigns = async (req, res, next) => {
   try {
-    const campaigns = await campaignModel.find({}, "title thumbnail id link");
+    const campaigns = await campaignModel.find({}, "title thumbnail id link taxBenefit");
 
     res.status(200).json({ campaigns });
   } catch (error) {
