@@ -81,7 +81,7 @@ exports.GetAllCampaigns = async (req, res, next) => {
   try {
     const campaigns = await campaignModel.find(
       { status: "public" }, // Filter for public campaigns
-      "title id link beneficiaryName thumbnail amount amountDonated"
+      "title id link beneficiaryName thumbnail amount amountDonated taxBenefit"
     );
 
     res.status(200).json({ campaigns });
