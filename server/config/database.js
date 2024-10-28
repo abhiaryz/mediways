@@ -2,9 +2,9 @@ const mongoose = require("mongoose");
 
 const connectdatabase = async () => {
   try {
-    // await mongoose.connect(process.env.MONGODB_CONNECT_URI);
+    // this is db from aniket mongodb account
     await mongoose.connect(
-      "mongodb+srv://ganeshghatti6:tBVJRtseC1Xfczbm@mediways.5bserjh.mongodb.net/?retryWrites=true&w=majority&appName=mediways"
+      "mongodb+srv://ganesh:12@aidcircle.uvee4.mongodb.net/?retryWrites=true&w=majority&appName=aidcircle"
     );
 
     console.log("db connection successful");
