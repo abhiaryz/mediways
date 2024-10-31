@@ -188,11 +188,6 @@ exports.Login = async (req, res, next) => {
       isVerified: existingUser.isVerified,
     });
   } catch (error) {
-    sendErrorEmail(
-      userdata.name,
-      userdata.email,
-      "User tried to login. Internal server error"
-    );
     res.status(500).json({ error: "Oops! Please try again later" });
   }
 };
