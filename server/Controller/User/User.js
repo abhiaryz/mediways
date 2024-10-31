@@ -196,10 +196,6 @@ exports.Login = async (req, res, next) => {
     res.status(500).json({ error: "Oops! Please try again later" });
   }
 };
-function generateHash(key, txnid, amount, productinfo, firstname, email, salt) {
-  const input = `${key}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|||||||||||${salt}`;
-  return crypto.createHash("sha512").update(input).digest("hex");
-}
 
 exports.InitiatePayment = async (req, res, next) => {
   const { username, email,amount,txnid } = req.body;
@@ -231,5 +227,15 @@ exports.InitiatePayment = async (req, res, next) => {
   } catch (error) {
     console.error("Error initiating payment:", error);
     res.status(500).json({ error: "Payment initiation failed" });
+  }
+};
+
+exports.GetMyAccount = async (req, res, next) => {
+  const { email } = req.body;
+  try {
+    const user = await userModel.findOne({ email });
+    res.status(200).json({ user });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
   }
 };
