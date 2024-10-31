@@ -164,7 +164,7 @@ exports.Login = async (req, res, next) => {
     if (!validator.isEmail(userdata.email)) {
       return res.status(400).send("Enter a valid email");
     }
-    const existingUser = await users.findOne({ email: userdata.email });
+    const existingUser = await userModel.findOne({ email: userdata.email });
     if (!existingUser) {
       return res.status(400).json({ error: "Wrong email or password" });
     }
@@ -178,16 +178,16 @@ exports.Login = async (req, res, next) => {
 
     const jwttoken = jwt.sign(
       { userId: existingUser._id },
-      process.env.JWTSECRET
+      process.env.USERJWTSECRET
     );
 
     res.status(200).json({
       email: existingUser.email,
       username: existingUser.username,
       token: jwttoken,
-      isVerified: existingUser.isVerified,
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Oops! Please try again later" });
   }
 };
