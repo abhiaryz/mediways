@@ -1,8 +1,9 @@
-const adminModel = require("../../Model/Admin");
-const campaignModel = require("../../Model/Campaign");
-const specialityModel = require("../../Model/Speciality");
-const serviceModel = require("../../Model/Services");
-const userModel = require("../../Model/User");
+const adminModel = require("../../models/Admin");
+const campaignModel = require("../../models/Campaign");
+const specialityModel = require("../../models/Speciality");
+const serviceModel = require("../../models/Services");
+const userModel = require("../../models/User");
+const transactionModel = require("../../models/Transactions");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -193,32 +194,43 @@ exports.Login = async (req, res, next) => {
 };
 
 exports.InitiatePayment = async (req, res, next) => {
-  const { username, email,amount,txnid } = req.body;
+  const { username, email, amount, campaignId } = req.body;
 
   try {
-    const key = process.env.PAYU_MERCHANT_KEY;
-    const salt= process.env.PAYU_SALT;
-    const productinfo = "Product Info";
+    // Generate unique transaction ID
+    const txnid = `TXN${Date.now()}${Math.floor(Math.random() * 1000)}`;
+    console.log(req.user);
+    // Create pending transaction record
+    const transaction = new transactionModel({
+      userId: req.user._id,
+      campaignId: campaignId,
+      amount: amount,
+      status: "pending",
+      txnid: txnid,
+    });
+
+    await transaction.save();
+
+    // Mock PayU hash generation
+    const key = process.env.PAYU_MERCHANT_KEY || "mockKey";
+    const salt = process.env.PAYU_SALT || "mockSalt";
+    const productinfo = "Donation";
     const firstname = username;
 
-    function calculateHash(key,txnid,amount,productinfo,firstname,email,salt) {
-      const hashString = `${key}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|||||||||||${salt}`;
-      return crypto.createHash("sha512").update(hashString).digest("hex");
-    };
+    const hashString = `${key}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|||||||||||${salt}`;
+    const hash = crypto.createHash("sha512").update(hashString).digest("hex");
 
-    const data = { key, txnid, amount, productinfo, firstname, email, salt };
-    const hash = calculateHash(
-      key,
+    res.status(200).json({
+      hash,
       txnid,
+      key,
       amount,
       productinfo,
       firstname,
       email,
-      salt
-    );
-    console.log(hash); // This should match the expected hash value
-
-    res.status(200).json({ data, hash });
+      surl: `${process.env.FRONTEND_URL}/user/confirm-transaction`,
+      furl: `${process.env.FRONTEND_URL}/user/confirm-transaction`,
+    });
   } catch (error) {
     console.error("Error initiating payment:", error);
     res.status(500).json({ error: "Payment initiation failed" });
@@ -228,9 +240,84 @@ exports.InitiatePayment = async (req, res, next) => {
 exports.GetMyAccount = async (req, res, next) => {
   const { email } = req.body;
   try {
-    const user = await userModel.findOne({ email });
-    res.status(200).json({ user });
+    const user = await userModel.findById(req.user._id).select("-password");
+
+    // Get user's transactions
+    const transactions = await transactionModel
+      .find({ userId: req.user._id })
+      .populate("campaignId", "title link") // Only get campaign title and link
+      .sort({ createdAt: -1 }); // Most recent first
+
+    res.status(200).json({
+      user,
+      transactions,
+    });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
+};
+
+exports.confirmTransaction = async (req, res) => {
+  try {
+    const { txnid, mihpayid, status } = req.body;
+
+    // Find and update transaction
+    const transaction = await transactionModel.findOneAndUpdate(
+      { txnid },
+      {
+        status: status.toLowerCase(),
+        paymentId: mihpayid,
+        payuResponse: req.body,
+      }
+    );
+    res.redirect(
+      `https://mediways-v2.vercel.app/payment-success?txnId=${txnid}&status=success`
+    );
+
+    // If payment successful, update campaign amount
+    // if (status.toLowerCase() === "success") {
+    //   await campaignModel.findByIdAndUpdate(transaction.campaignId, {
+    //     $inc: { amountDonated: Number(amount) },
+    //   });
+    // }
+  } catch (error) {
+    console.error("Payment confirmation error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error",
+    });
+  }
+};
+
+const verifyWithPayU = async (txnid, mihpayid) => {
+  try {
+    // Implement PayU verification API call
+    // This should use PayU's verification API to check payment status
+    const response = await axios.post("PAYU_VERIFICATION_URL", {
+      key: process.env.PAYU_KEY,
+      command: "verify_payment",
+      var1: txnid,
+      var2: mihpayid,
+      // Add other required parameters
+    });
+
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error("PayU verification failed:", error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+};
+
+// Generate hash for PayU response verification
+const generatePayUResponseHash = (params) => {
+  // Implement hash generation according to PayU documentation
+  // This should match the hash sent by PayU
+  const hashString = `${SALT}|${params.status}|${params.txnid}|...`;
+  return crypto.createHash("sha512").update(hashString).digest("hex");
 };

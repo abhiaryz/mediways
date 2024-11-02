@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const adminModel = require("../Model/Admin");
+const adminModel = require("../models/Admin");
 
 const requireAuth = async (req, res, next) => {
   try {
