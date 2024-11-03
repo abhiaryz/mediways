@@ -292,7 +292,7 @@ exports.PaymentSuccess = async (req, res) => {
 
     if (!transaction) {
       console.error('Transaction not found:', txnid);
-      return res.redirect(`${process.env.FRONTEND_URL}/payment-failure?error=transaction_not_found`);
+      return res.redirect(`${process.env.FRONTEND_URL}/payment-failure`);
     }
 
     // Update campaign amount
@@ -307,14 +307,13 @@ exports.PaymentSuccess = async (req, res) => {
     // Send success email to user
     const user = await userModel.findById(transaction.userId);
     if (user && user.email) {
-      // You can use your existing AlertEmail utility here
       await AlertEmail(user.email, `Payment Success - Amount: ₹${amount}`);
     }
 
-    res.redirect(`${process.env.FRONTEND_URL}/payment-success?txnid=${txnid}`);
+    res.redirect(`${process.env.FRONTEND_URL}/payment-success`);
   } catch (error) {
     console.error('Payment success error:', error);
-    res.redirect(`${process.env.FRONTEND_URL}/payment-failure?error=server_error`);
+    res.redirect(`${process.env.FRONTEND_URL}/payment-failure`);
   }
 };
 
@@ -352,7 +351,7 @@ exports.PaymentFailure = async (req, res) => {
 
     if (!transaction) {
       console.error('Transaction not found:', txnid);
-      return res.redirect(`${process.env.FRONTEND_URL}/payment-failure?error=transaction_not_found`);
+      return res.redirect(`${process.env.FRONTEND_URL}/payment-failure`);
     }
 
     // Send failure notification email
@@ -361,9 +360,9 @@ exports.PaymentFailure = async (req, res) => {
       await ErrorEmail(user.email, `Payment Failed - Error: ${error_Message || 'Unknown error'}`);
     }
 
-    res.redirect(`${process.env.FRONTEND_URL}/payment-failure?txnid=${txnid}`);
+    res.redirect(`${process.env.FRONTEND_URL}/payment-failure`);
   } catch (error) {
     console.error('Payment failure error:', error);
-    res.redirect(`${process.env.FRONTEND_URL}/payment-failure?error=server_error`);
+    res.redirect(`${process.env.FRONTEND_URL}/payment-failure`);
   }
 };
