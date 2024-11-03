@@ -1,18 +1,16 @@
 const mongoose = require("mongoose");
 
 const transactionSchema = new mongoose.Schema({
-  // Using email instead of ObjectId
   userId: {
     type: String,
     required: true,
-    ref: "User", // Still keeping the ref for potential population
+    ref: "User",
   },
 
-  // Using custom campaign ID instead of ObjectId
   campaignId: {
     type: String,
     required: true,
-    ref: "Campaign", // Still keeping the ref for potential population
+    ref: "Campaign",
   },
 
   amount: {
@@ -33,12 +31,32 @@ const transactionSchema = new mongoose.Schema({
   },
 
   paymentId: String,
-  payuResponse: Object,
+  mode: String,
+  bankcode: String,
+  bankref: String,
+  error: String,
+  errorMessage: String,
+  cardMask: String,
+  payuResponse: {
+    type: Object,
+    default: {}
+  },
 
   createdAt: {
     type: Date,
     default: Date.now,
   },
+
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  }
+});
+
+// Update timestamp on save
+transactionSchema.pre('save', function(next) {
+  this.updatedAt = new Date();
+  next();
 });
 
 const Transaction = mongoose.model("Transaction", transactionSchema);

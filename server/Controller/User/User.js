@@ -193,6 +193,26 @@ exports.Login = async (req, res, next) => {
   }
 };
 
+exports.GetMyAccount = async (req, res, next) => {
+  const { email } = req.body;
+  try {
+    const user = await userModel.findById(req.user._id).select("-password");
+
+    // Get user's transactions
+    const transactions = await transactionModel
+      .find({ userId: req.user._id })
+      .populate("campaignId", "title link") // Only get campaign title and link
+      .sort({ createdAt: -1 }); // Most recent first
+
+    res.status(200).json({
+      user,
+      transactions,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 exports.InitiatePayment = async (req, res, next) => {
   const { username, email, amount, campaignId } = req.body;
 
@@ -237,87 +257,113 @@ exports.InitiatePayment = async (req, res, next) => {
   }
 };
 
-exports.GetMyAccount = async (req, res, next) => {
-  const { email } = req.body;
+exports.PaymentSuccess = async (req, res) => {
   try {
-    const user = await userModel.findById(req.user._id).select("-password");
-
-    // Get user's transactions
-    const transactions = await transactionModel
-      .find({ userId: req.user._id })
-      .populate("campaignId", "title link") // Only get campaign title and link
-      .sort({ createdAt: -1 }); // Most recent first
-
-    res.status(200).json({
-      user,
-      transactions,
-    });
-  } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-exports.confirmTransaction = async (req, res) => {
-  try {
-    const { txnid, mihpayid, status } = req.body;
+    const {
+      txnid,
+      mihpayid,
+      status,
+      mode,
+      bankcode,
+      bank_ref_num,
+      error,
+      error_Message,
+      cardnum,
+      amount
+    } = req.body;
 
     // Find and update transaction
     const transaction = await transactionModel.findOneAndUpdate(
       { txnid },
       {
-        status: status.toLowerCase(),
+        status: 'success',
         paymentId: mihpayid,
+        mode: mode,
+        bankcode: bankcode,
+        bankref: bank_ref_num,
+        cardMask: cardnum,
+        error: error,
+        errorMessage: error_Message,
         payuResponse: req.body,
+        updatedAt: new Date()
+      },
+      { new: true }
+    );
+
+    if (!transaction) {
+      console.error('Transaction not found:', txnid);
+      return res.redirect(`${process.env.FRONTEND_URL}/payment-failure?error=transaction_not_found`);
+    }
+
+    // Update campaign amount
+    await campaignModel.findOneAndUpdate(
+      { _id: transaction.campaignId },
+      { 
+        $inc: { amountDonated: Number(amount) },
+        $set: { lastUpdate: new Date() }
       }
     );
-    res.redirect(
-      `https://mediways-v2.vercel.app/payment-success?txnId=${txnid}&status=success`
+
+    // Send success email to user
+    const user = await userModel.findById(transaction.userId);
+    if (user && user.email) {
+      // You can use your existing AlertEmail utility here
+      await AlertEmail(user.email, `Payment Success - Amount: ₹${amount}`);
+    }
+
+    res.redirect(`${process.env.FRONTEND_URL}/payment-success?txnid=${txnid}`);
+  } catch (error) {
+    console.error('Payment success error:', error);
+    res.redirect(`${process.env.FRONTEND_URL}/payment-failure?error=server_error`);
+  }
+};
+
+exports.PaymentFailure = async (req, res) => {
+  try {
+    const {
+      txnid,
+      mihpayid,
+      status,
+      mode,
+      bankcode,
+      bank_ref_num,
+      error,
+      error_Message,
+      cardnum
+    } = req.body;
+
+    // Find and update transaction
+    const transaction = await transactionModel.findOneAndUpdate(
+      { txnid },
+      {
+        status: 'failed',
+        paymentId: mihpayid,
+        mode: mode,
+        bankcode: bankcode,
+        bankref: bank_ref_num,
+        cardMask: cardnum,
+        error: error,
+        errorMessage: error_Message,
+        payuResponse: req.body,
+        updatedAt: new Date()
+      },
+      { new: true }
     );
 
-    // If payment successful, update campaign amount
-    // if (status.toLowerCase() === "success") {
-    //   await campaignModel.findByIdAndUpdate(transaction.campaignId, {
-    //     $inc: { amountDonated: Number(amount) },
-    //   });
-    // }
+    if (!transaction) {
+      console.error('Transaction not found:', txnid);
+      return res.redirect(`${process.env.FRONTEND_URL}/payment-failure?error=transaction_not_found`);
+    }
+
+    // Send failure notification email
+    const user = await userModel.findById(transaction.userId);
+    if (user && user.email) {
+      await ErrorEmail(user.email, `Payment Failed - Error: ${error_Message || 'Unknown error'}`);
+    }
+
+    res.redirect(`${process.env.FRONTEND_URL}/payment-failure?txnid=${txnid}`);
   } catch (error) {
-    console.error("Payment confirmation error:", error);
-    res.status(500).json({
-      success: false,
-      error: "Internal server error",
-    });
+    console.error('Payment failure error:', error);
+    res.redirect(`${process.env.FRONTEND_URL}/payment-failure?error=server_error`);
   }
-};
-
-const verifyWithPayU = async (txnid, mihpayid) => {
-  try {
-    // Implement PayU verification API call
-    // This should use PayU's verification API to check payment status
-    const response = await axios.post("PAYU_VERIFICATION_URL", {
-      key: process.env.PAYU_KEY,
-      command: "verify_payment",
-      var1: txnid,
-      var2: mihpayid,
-      // Add other required parameters
-    });
-
-    return {
-      success: true,
-      data: response.data,
-    };
-  } catch (error) {
-    console.error("PayU verification failed:", error);
-    return {
-      success: false,
-      error: error.message,
-    };
-  }
-};
-
-// Generate hash for PayU response verification
-const generatePayUResponseHash = (params) => {
-  // Implement hash generation according to PayU documentation
-  // This should match the hash sent by PayU
-  const hashString = `${SALT}|${params.status}|${params.txnid}|...`;
-  return crypto.createHash("sha512").update(hashString).digest("hex");
 };
