@@ -217,10 +217,8 @@ exports.InitiatePayment = async (req, res, next) => {
   const { username, email, amount, campaignId } = req.body;
 
   try {
-    // Generate unique transaction ID
     const txnid = `TXN${Date.now()}${Math.floor(Math.random() * 1000)}`;
-    console.log(req.user);
-    // Create pending transaction record
+    
     const transaction = new transactionModel({
       userId: req.user._id,
       campaignId: campaignId,
@@ -228,19 +226,19 @@ exports.InitiatePayment = async (req, res, next) => {
       status: "pending",
       txnid: txnid,
     });
-
+    
     await transaction.save();
 
-    // Mock PayU hash generation
-    const key = process.env.PAYU_MERCHANT_KEY || "mockKey";
-    const salt = process.env.PAYU_SALT || "mockSalt";
+    const key = process.env.PAYU_MERCHANT_KEY;
+    const salt = process.env.PAYU_SALT;
     const productinfo = "Donation";
     const firstname = username;
-
+    
+    // Simplified hash generation
     const hashString = `${key}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|||||||||||${salt}`;
     const hash = crypto.createHash("sha512").update(hashString).digest("hex");
 
-    res.status(200).json({
+    res.status(200).json({ 
       hash,
       txnid,
       key,
@@ -248,8 +246,8 @@ exports.InitiatePayment = async (req, res, next) => {
       productinfo,
       firstname,
       email,
-      surl: `${process.env.FRONTEND_URL}/user/confirm-transaction`,
-      furl: `${process.env.FRONTEND_URL}/user/confirm-transaction`,
+      surl: `${process.env.BACKEND_URL}/user/payment-success`,
+      furl: `${process.env.BACKEND_URL}/user/payment-failure`
     });
   } catch (error) {
     console.error("Error initiating payment:", error);
@@ -269,44 +267,12 @@ exports.PaymentSuccess = async (req, res) => {
       error,
       error_Message,
       cardnum,
-      amount,
-      key
+      amount
     } = req.body;
 
-    // Verify that transaction exists and is in pending state
-    const existingTransaction = await transactionModel.findOne({ txnid });
-    
-    if (!existingTransaction) {
-      console.error('Transaction not found:', txnid);
-      return res.status(404).json({
-        success: false,
-        message: 'Transaction not found'
-      });
-    }
-
-    if (existingTransaction.status !== 'pending') {
-      console.error('Invalid transaction state:', existingTransaction.status);
-      return res.status(400).json({
-        success: false,
-        message: 'Transaction already processed'
-      });
-    }
-
-    // Verify merchant key
-    if (key !== process.env.PAYU_MERCHANT_KEY) {
-      console.error('Invalid merchant key');
-      return res.status(403).json({
-        success: false,
-        message: 'Invalid merchant verification'
-      });
-    }
-
-    // Update transaction
+    // Find and update transaction
     const transaction = await transactionModel.findOneAndUpdate(
-      { 
-        txnid,
-        status: 'pending' // Additional check to prevent race conditions
-      },
+      { txnid, status: 'pending' },
       {
         status: 'success',
         paymentId: mihpayid,
@@ -322,6 +288,11 @@ exports.PaymentSuccess = async (req, res) => {
       { new: true }
     );
 
+    if (!transaction) {
+      console.error('Transaction not found or already processed:', txnid);
+      return res.redirect(`${process.env.FRONTEND_URL}/payment-failure`);
+    }
+
     // Update campaign amount
     await campaignModel.findOneAndUpdate(
       { _id: transaction.campaignId },
@@ -331,27 +302,10 @@ exports.PaymentSuccess = async (req, res) => {
       }
     );
 
-    // Log successful transaction
-    console.log('Payment successful:', {
-      txnid,
-      amount,
-      mihpayid,
-      mode
-    });
-
-    res.status(200).json({
-      success: true,
-      txnid: txnid,
-      redirect: `${process.env.FRONTEND_URL}/payment-success`
-    });
-
+    res.redirect(`${process.env.FRONTEND_URL}/payment-success`);
   } catch (error) {
     console.error('Payment success error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error',
-      redirect: `${process.env.FRONTEND_URL}/payment-failure`
-    });
+    res.redirect(`${process.env.FRONTEND_URL}/payment-failure`);
   }
 };
 
@@ -369,8 +323,8 @@ exports.PaymentFailure = async (req, res) => {
       cardnum
     } = req.body;
 
-    // Find and update transaction
-    const transaction = await transactionModel.findOneAndUpdate(
+    // Update transaction status
+    await transactionModel.findOneAndUpdate(
       { txnid },
       {
         status: 'failed',
@@ -383,20 +337,8 @@ exports.PaymentFailure = async (req, res) => {
         errorMessage: error_Message,
         payuResponse: req.body,
         updatedAt: new Date()
-      },
-      { new: true }
+      }
     );
-
-    if (!transaction) {
-      console.error('Transaction not found:', txnid);
-      return res.redirect(`${process.env.FRONTEND_URL}/payment-failure`);
-    }
-
-    // Send failure notification email
-    const user = await userModel.findById(transaction.userId);
-    if (user && user.email) {
-      await ErrorEmail(user.email, `Payment Failed - Error: ${error_Message || 'Unknown error'}`);
-    }
 
     res.redirect(`${process.env.FRONTEND_URL}/payment-failure`);
   } catch (error) {
