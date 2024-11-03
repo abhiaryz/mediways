@@ -269,12 +269,44 @@ exports.PaymentSuccess = async (req, res) => {
       error,
       error_Message,
       cardnum,
-      amount
+      amount,
+      key
     } = req.body;
 
-    // Find and update transaction
+    // Verify that transaction exists and is in pending state
+    const existingTransaction = await transactionModel.findOne({ txnid });
+    
+    if (!existingTransaction) {
+      console.error('Transaction not found:', txnid);
+      return res.status(404).json({
+        success: false,
+        message: 'Transaction not found'
+      });
+    }
+
+    if (existingTransaction.status !== 'pending') {
+      console.error('Invalid transaction state:', existingTransaction.status);
+      return res.status(400).json({
+        success: false,
+        message: 'Transaction already processed'
+      });
+    }
+
+    // Verify merchant key
+    if (key !== process.env.PAYU_MERCHANT_KEY) {
+      console.error('Invalid merchant key');
+      return res.status(403).json({
+        success: false,
+        message: 'Invalid merchant verification'
+      });
+    }
+
+    // Update transaction
     const transaction = await transactionModel.findOneAndUpdate(
-      { txnid },
+      { 
+        txnid,
+        status: 'pending' // Additional check to prevent race conditions
+      },
       {
         status: 'success',
         paymentId: mihpayid,
@@ -290,11 +322,6 @@ exports.PaymentSuccess = async (req, res) => {
       { new: true }
     );
 
-    if (!transaction) {
-      console.error('Transaction not found:', txnid);
-      return res.redirect(`${process.env.FRONTEND_URL}/payment-failure`);
-    }
-
     // Update campaign amount
     await campaignModel.findOneAndUpdate(
       { _id: transaction.campaignId },
@@ -304,16 +331,27 @@ exports.PaymentSuccess = async (req, res) => {
       }
     );
 
-    // Send success email to user
-    const user = await userModel.findById(transaction.userId);
-    if (user && user.email) {
-      await AlertEmail(user.email, `Payment Success - Amount: ₹${amount}`);
-    }
+    // Log successful transaction
+    console.log('Payment successful:', {
+      txnid,
+      amount,
+      mihpayid,
+      mode
+    });
 
-    res.redirect(`${process.env.FRONTEND_URL}/payment-success`);
+    res.status(200).json({
+      success: true,
+      txnid: txnid,
+      redirect: `${process.env.FRONTEND_URL}/payment-success`
+    });
+
   } catch (error) {
     console.error('Payment success error:', error);
-    res.redirect(`${process.env.FRONTEND_URL}/payment-failure`);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      redirect: `${process.env.FRONTEND_URL}/payment-failure`
+    });
   }
 };
 
