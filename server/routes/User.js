@@ -15,6 +15,7 @@ const {
   PaymentSuccess,
   PaymentFailure,
 } = require("../Controller/User/User");
+const verifyPayUHash = require('../middleware/PayUVerification');
 
 router.route("/user/get-all-specialties").get(GetAllSpecialities);
 router.route("/user/get-speciality-details/:link").get(GetSpecialityDetails);
@@ -27,9 +28,17 @@ router.route("/user/payu/hash").post(requireAuth, InitiatePayment);
 router.route("/user/my-account").get(requireAuth, GetMyAccount);
 router
   .route("/user/payment-success")
-  .post(express.urlencoded({ extended: true }), PaymentSuccess);
+  .post(
+    express.urlencoded({ extended: true }),
+    verifyPayUHash,
+    PaymentSuccess
+  );
 router
   .route("/user/payment-failure")
-  .post(express.urlencoded({ extended: true }), PaymentFailure);
+  .post(
+    express.urlencoded({ extended: true }),
+    verifyPayUHash,
+    PaymentFailure
+  );
 
 module.exports = router;
