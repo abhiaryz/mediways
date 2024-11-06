@@ -15,6 +15,7 @@ const {
   UploadCampaignImgtoS3,
   GetCampaignImgPresignedUrl,
   DeleteCampaign,
+  GetAllTimeTransactions,
 } = require("../Controller/Admin/Campaign");
 
 const {
@@ -42,6 +43,8 @@ router.route("/admin/login").post(AdminLogin);
 router.route("/admin/get-profile").get(requireAuth, GetProfile);
 router.route("/admin/update-profile").post(requireAuth, UpdateProfile);
 
+
+// Campaign Routes
 router.post(
   "/admin/campaign-new",
   upload.fields([
@@ -52,6 +55,7 @@ router.post(
 );
 router.route("/admin/get-all-campaigns").get(GetAllCampaigns);
 router.route("/admin/get-campaign-details/:link").get(GetCampaignDetails);
+router.route("/admin/campaign-all-time-transactions/:link").get(GetAllTimeTransactions);
 
 router.put(
   "/admin/update-campaign-details/:link",
@@ -76,6 +80,9 @@ router
 //   "/admin/get-campaign-img-presigned-url/:link",
 //   GetCampaignImgPresignedUrl
 // );
+
+
+// Speciality Routes
 
 router.post(
   "/admin/speciality-new",
@@ -105,6 +112,8 @@ router
   .route("/admin/speciality-delete/:link")
   .delete(requireAuth, DeleteSpeciality);
 
+
+// Service Routes
 router.post(
   "/admin/service-new",
   upload.fields([{ name: "icon", maxCount: 1 }]),

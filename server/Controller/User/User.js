@@ -302,7 +302,7 @@ exports.PaymentSuccess = async (req, res) => {
 
     // Fetch user details from the transaction
     const user = await userModel.findById(transaction.userId);
-
+    
     await sendPaymentEmail({
       status: "success",
       name: user.username,

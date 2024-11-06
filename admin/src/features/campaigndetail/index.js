@@ -12,6 +12,26 @@ import { Link, useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import FormikRichText from "../../components/RichText/CampaignRichText";
 import ToogleInput from "../../components/Input/ToogleInput";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+
+// Register ChartJS components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 function CampaignDetail() {
   const navigate = useNavigate();
@@ -49,6 +69,10 @@ function CampaignDetail() {
   const [documentImagesToDelete, setDocumentImagesToDelete] = useState([]);
   const [newUpdateText, setNewUpdateText] = useState("");
   const [newUpdateDate, setNewUpdateDate] = useState("");
+  const [transactions, setTransactions] = useState([]);
+  const [weeklyTransactions, setWeeklyTransactions] = useState([]);
+  const [allTimeTransactions, setAllTimeTransactions] = useState([]);
+  const [showAllTime, setShowAllTime] = useState(false);
 
   const extractImageUrls = (content) => {
     const tempDiv = document.createElement("div");
@@ -97,6 +121,7 @@ function CampaignDetail() {
         }));
         const initialImages = extractImageUrls(campaign.content);
         setInitialImages(initialImages);
+        setTransactions(response.data.transactions);
       }
     } catch (error) {
       console.log(error);
@@ -427,6 +452,114 @@ function CampaignDetail() {
     }
   };
 
+  const fetchWeeklyData = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/admin/get-campaign-details/${link}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setFormData(response.data.campaign);
+      setWeeklyTransactions(response.data.weeklyTransactions);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching campaign details:", error);
+      setLoading(false);
+    }
+  };
+
+  const fetchAllTimeData = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/admin/campaign-all-time-transactions/${link}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log(response.data.allTimeTransactions)
+      setAllTimeTransactions(response.data.allTimeTransactions);
+    } catch (error) {
+      console.error("Error fetching all-time transactions:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchWeeklyData();
+  }, [link]);
+
+  const getChartData = () => {
+    const data = showAllTime ? allTimeTransactions : weeklyTransactions;
+    
+    return {
+      labels: data.map(item => {
+        if (showAllTime) {
+          const [year, month] = item._id.split('-');
+          return `${new Date(year, month - 1).toLocaleString('default', { month: 'short' })} ${year}`;
+        }
+        return new Date(item._id).toLocaleDateString('default', { weekday: 'short' });
+      }),
+      datasets: [
+        {
+          label: showAllTime ? 'Monthly Donations' : 'Daily Donations This Week',
+          data: data.map(item => item.totalAmount),
+          backgroundColor: 'rgba(75, 192, 192, 0.6)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 1,
+        },
+        {
+          label: showAllTime ? 'Monthly Transaction Count' : 'Daily Transaction Count',
+          data: data.map(item => item.count),
+          backgroundColor: 'rgba(153, 102, 255, 0.6)',
+          borderColor: 'rgba(153, 102, 255, 1)',
+          borderWidth: 1,
+          yAxisID: 'count'
+        }
+      ]
+    };
+  };
+
+  const chartOptions = {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Amount (₹)'
+        }
+      },
+      count: {
+        beginAtZero: true,
+        position: 'right',
+        title: {
+          display: true,
+          text: 'Number of Transactions'
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: showAllTime ? 'All Time Campaign Donations' : 'This Week\'s Campaign Donations'
+      }
+    }
+  };
+
+  const handleToggleView = async () => {
+    if (!showAllTime && allTimeTransactions.length === 0) {
+      await fetchAllTimeData();
+    }
+    setShowAllTime(!showAllTime);
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <>
       <NotificationContainer />
@@ -459,7 +592,6 @@ function CampaignDetail() {
               onChange={updateToggleValue}
             />
           </label>
-
           <div className="form-control flex flex-col gap-2">
             <label className="label">
               <span className="label-text">Total donation amount</span>
@@ -486,7 +618,7 @@ function CampaignDetail() {
               <span className="label-text">Amount donated till now</span>
             </label>
             <input
-              type="number"
+              type="disabled"
               value={formData.amountDonated}
               placeholder="Enter amount donated till now"
               onChange={(e) => handleAmountDonatedChange(e.target.value)}
@@ -786,7 +918,27 @@ function CampaignDetail() {
               )}
             </div>
           </div>
-
+          <div className="mt-6 p-4 bg-white rounded-lg shadow">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Donation Statistics</h2>
+          <button
+            onClick={handleToggleView}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+          >
+            {showAllTime ? 'Show This Week' : 'Show All Time'}
+          </button>
+        </div>
+        
+        <div className="h-[400px]">
+          {(showAllTime ? allTimeTransactions : weeklyTransactions).length > 0 ? (
+            <Bar data={getChartData()} options={chartOptions} />
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-gray-500">No transaction data available</p>
+            </div>
+          )}
+        </div>
+      </div>
           <ErrorText styleClass="mt-8">{errorMessage}</ErrorText>
           <button
             type="submit"

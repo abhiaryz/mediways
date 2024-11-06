@@ -1,5 +1,6 @@
 const adminModel = require("../../models/Admin");
 const campaignModel = require("../../models/Campaign");
+const transactionModel = require("../../models/Transactions");
 const specialityModel = require("../../models/Speciality");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
@@ -113,7 +114,7 @@ exports.CampaignNew = async (req, res, next) => {
 
 exports.GetAllCampaigns = async (req, res, next) => {
   try {
-    const campaigns = await campaignModel.find({}, "title thumbnail id link taxBenefit");
+    const campaigns = await campaignModel.find({}, "title thumbnail id link taxBenefit amount amountDonated");
 
     res.status(200).json({ campaigns });
   } catch (error) {
@@ -132,11 +133,77 @@ exports.GetCampaignDetails = async (req, res, next) => {
     if (!campaign) {
       return res.status(404).json({ message: "Campaign not found" });
     }
+
+    // Calculate the start of the current week (Sunday)
+    const startOfWeek = new Date();
+    startOfWeek.setHours(0, 0, 0, 0);
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+
+    // Fetch transactions for current week
+    const transactions = await transactionModel.aggregate([
+      {
+        $match: {
+          campaignId: campaign._id.toString(),
+          createdAt: { $gte: startOfWeek },
+          status: "success"
+        }
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          totalAmount: { $sum: "$amount" },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      }
+    ]);
+
     return res.status(200).json({
       campaign,
+      weeklyTransactions: transactions,
     });
   } catch (error) {
     console.error("Error fetching campaign details:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// New endpoint for all-time transactions
+exports.GetAllTimeTransactions = async (req, res) => {
+  const { link } = req.params;
+
+  try {
+    const campaign = await campaignModel.findOne({ link });
+    if (!campaign) {
+      return res.status(404).json({ message: "Campaign not found" });
+    }
+
+    const transactions = await transactionModel.aggregate([
+      {
+        $match: {
+          campaignId: campaign._id.toString(),
+          status: "success"
+        }
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+          totalAmount: { $sum: "$amount" },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      }
+    ]);
+
+    return res.status(200).json({
+      allTimeTransactions: transactions,
+    });
+  } catch (error) {
+    console.error("Error fetching all-time transactions:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
