@@ -62,25 +62,44 @@ function Campaigns() {
         <CreateNewCard />
       </div>
       <br /> <br />
-      <br />{" "}
+      <br />
       {campaigns && campaigns.length > 0 && (
         <Title children="Existing Campaigns" />
       )}
       <br />
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {campaigns &&
+        {loading ? (
+          // Add loading skeletons here
+          [...Array(4)].map((_, index) => (
+            <div key={index} className="animate-pulse">
+              <div className="bg-gray-200 h-48 rounded-t-lg"></div>
+              <div className="bg-gray-200 h-24 rounded-b-lg mt-1"></div>
+            </div>
+          ))
+        ) : (
+          campaigns &&
           campaigns.length > 0 &&
-          campaigns.map((i, k) => {
+          campaigns.map((campaign, k) => {
             return (
               <CampaignCard
                 key={k}
-                title={i.title}
-                url={i.thumbnail}
-                link={i.link}
+                title={campaign.title}
+                url={campaign.thumbnail}
+                link={campaign.link}
+                amount={campaign.amount}
+                amountDonated={campaign.amountDonated}
               />
             );
-          })}
+          })
+        )}
       </div>
+
+      {/* No campaigns message */}
+      {!loading && (!campaigns || campaigns.length === 0) && (
+        <div className="text-center text-gray-500 mt-8">
+          No campaigns found. Create a new campaign to get started.
+        </div>
+      )}
     </>
   );
 }
