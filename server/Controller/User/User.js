@@ -26,6 +26,7 @@ const path = require("path");
 const fs = require("fs");
 const s3 = require("../../config/aws_s3");
 const crypto = require("crypto");
+const { sendPaymentEmail } = require("../../utils/mail/PaymentEmail");
 
 dotenv.config({ path: path.join(__dirname, "..", "..", "api", ".env") });
 
@@ -145,7 +146,10 @@ exports.Register = async (req, res, next) => {
 
     const newUser = await user.save();
 
-    const token = jwt.sign({ userId: newUser._id }, process.env.USERJWTSECRET);
+    const token = jwt.sign(
+      { userId: newUser._id, username: newUser.username, email: newUser.email },
+      process.env.USERJWTSECRET
+    );
 
     res.status(200).json({
       email: newUser.email,
@@ -178,7 +182,11 @@ exports.Login = async (req, res, next) => {
     }
 
     const jwttoken = jwt.sign(
-      { userId: existingUser._id },
+      {
+        userId: existingUser._id,
+        username: existingUser.username,
+        email: existingUser.email,
+      },
       process.env.USERJWTSECRET
     );
 
@@ -194,15 +202,15 @@ exports.Login = async (req, res, next) => {
 };
 
 exports.GetMyAccount = async (req, res, next) => {
-  const { email } = req.body;
   try {
     const user = await userModel.findById(req.user._id).select("-password");
 
-    // Get user's transactions
+    // Get user's transactions with only essential fields
     const transactions = await transactionModel
       .find({ userId: req.user._id })
-      .populate("campaignId", "title link") // Only get campaign title and link
-      .sort({ createdAt: -1 }); // Most recent first
+      .select("amount status txnid paymentDetails createdAt")
+      .populate("campaignId", "title link")
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       user,
@@ -218,7 +226,7 @@ exports.InitiatePayment = async (req, res, next) => {
 
   try {
     const txnid = `TXN${Date.now()}${Math.floor(Math.random() * 1000)}`;
-    
+
     const transaction = new transactionModel({
       userId: req.user._id,
       campaignId: campaignId,
@@ -226,19 +234,19 @@ exports.InitiatePayment = async (req, res, next) => {
       status: "pending",
       txnid: txnid,
     });
-    
+
     await transaction.save();
 
     const key = process.env.PAYU_MERCHANT_KEY;
     const salt = process.env.PAYU_SALT;
     const productinfo = "Donation";
     const firstname = username;
-    
+
     // Simplified hash generation
     const hashString = `${key}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|||||||||||${salt}`;
     const hash = crypto.createHash("sha512").update(hashString).digest("hex");
 
-    res.status(200).json({ 
+    res.status(200).json({
       hash,
       txnid,
       key,
@@ -247,7 +255,7 @@ exports.InitiatePayment = async (req, res, next) => {
       firstname,
       email,
       surl: `${process.env.BACKEND_URL}/user/payment-success`,
-      furl: `${process.env.BACKEND_URL}/user/payment-failure`
+      furl: `${process.env.BACKEND_URL}/user/payment-failure`,
     });
   } catch (error) {
     console.error("Error initiating payment:", error);
@@ -257,54 +265,60 @@ exports.InitiatePayment = async (req, res, next) => {
 
 exports.PaymentSuccess = async (req, res) => {
   try {
-    const {
-      txnid,
-      mihpayid,
-      status,
-      mode,
-      bankcode,
-      bank_ref_num,
-      error,
-      error_Message,
-      cardnum,
-      amount
-    } = req.body;
+    const { txnid, mihpayid, mode, bankcode, cardnum, error_Message, amount } =
+      req.body;
 
-    // Find and update transaction
+    // Find and update transaction with essential info only
     const transaction = await transactionModel.findOneAndUpdate(
-      { txnid, status: 'pending' },
+      { txnid, status: "pending" },
       {
-        status: 'success',
-        paymentId: mihpayid,
-        mode: mode,
-        bankcode: bankcode,
-        bankref: bank_ref_num,
-        cardMask: cardnum,
-        error: error,
-        errorMessage: error_Message,
-        payuResponse: req.body,
-        updatedAt: new Date()
+        status: "success",
+        paymentDetails: {
+          paymentId: mihpayid,
+          mode: mode,
+          bankName: bankcode || undefined,
+          cardLastDigits: cardnum ? cardnum.slice(-4) : undefined,
+          failureReason: error_Message,
+          timestamp: new Date(),
+        },
+        updatedAt: new Date(),
       },
       { new: true }
     );
 
     if (!transaction) {
-      console.error('Transaction not found or already processed:', txnid);
+      console.error("Transaction not found or already processed:", txnid);
       return res.redirect(`${process.env.FRONTEND_URL}/payment-failure`);
     }
 
     // Update campaign amount
     await campaignModel.findOneAndUpdate(
       { _id: transaction.campaignId },
-      { 
+      {
         $inc: { amountDonated: Number(amount) },
-        $set: { lastUpdate: new Date() }
+        $set: { lastUpdate: new Date() },
       }
     );
 
+    // Fetch user details from the transaction
+    const user = await userModel.findById(transaction.userId);
+
+    await sendPaymentEmail({
+      status: "success",
+      name: user.username,
+      email: user.email,
+      amount: amount,
+      txnId: txnid,
+      date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+      paymentMethod: mode,
+      campaignTitle: transaction.campaignId.title,
+      campaignLink: transaction.campaignId.link,
+      taxBenefit: transaction.campaignId.taxBenefit?.isTaxBenefit,
+    });
+
     res.redirect(`${process.env.FRONTEND_URL}/payment-success`);
   } catch (error) {
-    console.error('Payment success error:', error);
+    console.error("Payment success error:", error);
     res.redirect(`${process.env.FRONTEND_URL}/payment-failure`);
   }
 };
@@ -320,14 +334,14 @@ exports.PaymentFailure = async (req, res) => {
       bank_ref_num,
       error,
       error_Message,
-      cardnum
+      cardnum,
     } = req.body;
 
     // Update transaction status
-    await transactionModel.findOneAndUpdate(
+    const transaction = await transactionModel.findOneAndUpdate(
       { txnid },
       {
-        status: 'failed',
+        status: "failed",
         paymentId: mihpayid,
         mode: mode,
         bankcode: bankcode,
@@ -336,13 +350,28 @@ exports.PaymentFailure = async (req, res) => {
         error: error,
         errorMessage: error_Message,
         payuResponse: req.body,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       }
     );
 
+    // Fetch user details from the transaction
+    const user = await userModel.findById(transaction.userId);
+
+    await sendPaymentEmail({
+      status: "failed",
+      name: user.username,
+      email: user.email,
+      amount: amount,
+      txnId: txnid,
+      date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+      errorMessage: error_Message,
+      campaignTitle: transaction.campaignId.title,
+      campaignLink: transaction.campaignId.link,
+    });
+
     res.redirect(`${process.env.FRONTEND_URL}/payment-failure`);
   } catch (error) {
-    console.error('Payment failure error:', error);
+    console.error("Payment failure error:", error);
     res.redirect(`${process.env.FRONTEND_URL}/payment-failure`);
   }
 };

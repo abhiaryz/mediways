@@ -30,16 +30,13 @@ const transactionSchema = new mongoose.Schema({
     required: true,
   },
 
-  paymentId: String,
-  mode: String,
-  bankcode: String,
-  bankref: String,
-  error: String,
-  errorMessage: String,
-  cardMask: String,
-  payuResponse: {
-    type: Object,
-    default: {}
+  paymentDetails: {
+    paymentId: String,
+    mode: String,
+    bankName: String,
+    cardLastDigits: String,
+    failureReason: String,
+    timestamp: Date
   },
 
   createdAt: {
@@ -53,7 +50,6 @@ const transactionSchema = new mongoose.Schema({
   }
 });
 
-// Update timestamp on save
 transactionSchema.pre('save', function(next) {
   this.updatedAt = new Date();
   next();
