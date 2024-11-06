@@ -311,9 +311,8 @@ exports.PaymentSuccess = async (req, res) => {
       txnId: txnid,
       date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
       paymentMethod: mode,
-      campaignTitle: transaction.campaignId.title,
       campaignLink: transaction.campaignId.link,
-      taxBenefit: transaction.campaignId.taxBenefit?.isTaxBenefit,
+      taxBenefit: transaction.campaignId.taxBenefit?.isTaxBenefit
     });
 
     res.redirect(`${process.env.FRONTEND_URL}/payment-success`);
@@ -365,8 +364,7 @@ exports.PaymentFailure = async (req, res) => {
       txnId: txnid,
       date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
       errorMessage: error_Message,
-      campaignTitle: transaction.campaignId.title,
-      campaignLink: transaction.campaignId.link,
+      campaignLink: transaction.campaignId.link
     });
 
     res.redirect(`${process.env.FRONTEND_URL}/payment-failure`);

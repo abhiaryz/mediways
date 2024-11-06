@@ -57,7 +57,7 @@ const successEmailTemplate = (data) => {
           
           <p>Dear ${data.name},</p>
           
-          <p>We are grateful for your generous contribution of ₹${data.amount} to "${data.campaignTitle}". Your support will make a meaningful difference in helping us achieve our mission.</p>
+          <p>We are grateful for your generous contribution of ₹${data.amount}.</p>
           
           <div class="transaction-details">
             <h3 style="margin-top: 0; color: #495057;">Transaction Details:</h3>

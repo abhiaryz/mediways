@@ -64,7 +64,7 @@ const failureEmailTemplate = (data) => {
           
           <p>Dear ${data.name},</p>
           
-          <p>We noticed that your recent donation attempt of ₹${data.amount} to "${data.campaignTitle}" was unsuccessful.</p>
+          <p>We noticed that your recent donation attempt of ₹${data.amount} was unsuccessful.</p>
           
           <div class="transaction-details">
             <h3 style="margin-top: 0; color: #dc3545;">Transaction Details:</h3>
