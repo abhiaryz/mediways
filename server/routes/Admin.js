@@ -34,6 +34,11 @@ const {
   DeleteService,
 } = require("../Controller/Admin/Service");
 
+const {
+  GetTransactions,
+  SearchTransactions,
+} = require("../Controller/Admin/Transaction");
+
 // Configure multer for memory storage
 const multer = require("multer");
 const storage = multer.memoryStorage();
@@ -127,5 +132,8 @@ router.put(
   UpdateServiceDetails
 );
 router.route("/admin/service-delete/:id").delete(requireAuth, DeleteService);
+
+router.get("/admin/transactions", GetTransactions);
+router.get("/admin/transactions/search", SearchTransactions);
 
 module.exports = router;

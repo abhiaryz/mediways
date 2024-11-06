@@ -6,7 +6,8 @@ import Cog6ToothIcon from "@heroicons/react/24/outline/Cog6ToothIcon";
 import CurrencyDollarIcon from "@heroicons/react/24/outline/CurrencyDollarIcon";
 import InboxArrowDownIcon from "@heroicons/react/24/outline/InboxArrowDownIcon";
 import UsersIcon from "@heroicons/react/24/outline/UsersIcon";
-import BoltIcon from '@heroicons/react/24/outline/BoltIcon'
+import BoltIcon from "@heroicons/react/24/outline/BoltIcon";
+import { FaExchangeAlt } from "react-icons/fa";
 
 const iconClasses = `h-6 w-6`;
 const iconLargeClasses = `h-10 w-10`;
@@ -21,11 +22,11 @@ const routes = [
     desc: "Home",
   },
   {
-    path: "/app/Specialities", // url
-    icon: <InboxArrowDownIcon className={iconClasses} />, // icon component
-    iconlarge: <InboxArrowDownIcon className={iconLargeClasses} />, // icon component
-    name: "Specialities", // name that appear in Sidebar
-    desc: "Create new or Modify exisiting Speciality",
+    path: "/app/transactions", // url
+    icon: <FaExchangeAlt className={iconClasses} />, // icon component
+    iconlarge: <FaExchangeAlt className={iconLargeClasses} />, // icon component
+    name: "Transactions", // name that appear in Sidebar
+    desc: "View all transactions",
   },
   {
     path: "/app/campaigns", // url
@@ -33,6 +34,13 @@ const routes = [
     iconlarge: <CurrencyDollarIcon className={iconLargeClasses} />, // icon component
     name: "Campaigns", // name that appear in Sidebar
     desc: "Create new or Modify exisiting Campaign",
+  },
+  {
+    path: "/app/Specialities", // url
+    icon: <InboxArrowDownIcon className={iconClasses} />, // icon component
+    iconlarge: <InboxArrowDownIcon className={iconLargeClasses} />, // icon component
+    name: "Specialities", // name that appear in Sidebar
+    desc: "Create new or Modify exisiting Speciality",
   },
   {
     path: "/app/services", // url

@@ -13,6 +13,7 @@ const SpecialityDetail = lazy(() =>
   import("../pages/protected/SpecialityDetail")
 );
 const Campaigns = lazy(() => import("../pages/protected/Campaigns"));
+const Transactions = lazy(() => import("../pages/protected/Transactions"));
 const CampaignNew = lazy(() => import("../pages/protected/CampaignNew"));
 const CampaignDetail = lazy(() => import("../pages/protected/CampaignDetail"));
 const Services = lazy(() => import("../pages/protected/Services"));
@@ -56,6 +57,10 @@ const routes = [
   {
     path: "/services",
     component: Services,
+  },
+  {
+    path: "/transactions",
+    component: Transactions,
   },
   {
     path: "/404",
