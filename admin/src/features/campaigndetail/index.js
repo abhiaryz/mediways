@@ -90,9 +90,7 @@ function CampaignDetail() {
       if (token && link) {
         setLoading(true);
         const response = await axios.get(
-          `${
-            import.meta.env.VITE_SERVER_URL
-          }/admin/get-campaign-details/${link}`,
+          `${import.meta.env.VITE_SERVER_URL}/admin/get-campaign-details/${link}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -121,7 +119,7 @@ function CampaignDetail() {
         }));
         const initialImages = extractImageUrls(campaign.content);
         setInitialImages(initialImages);
-        setTransactions(response.data.transactions);
+        setWeeklyTransactions(response.data.weeklyTransactions);
       }
     } catch (error) {
       console.log(error);
@@ -452,23 +450,6 @@ function CampaignDetail() {
     }
   };
 
-  const fetchWeeklyData = async () => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/admin/get-campaign-details/${link}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setFormData(response.data.campaign);
-      setWeeklyTransactions(response.data.weeklyTransactions);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching campaign details:", error);
-      setLoading(false);
-    }
-  };
-
   const fetchAllTimeData = async () => {
     try {
       const response = await axios.get(
@@ -483,10 +464,6 @@ function CampaignDetail() {
       console.error("Error fetching all-time transactions:", error);
     }
   };
-
-  useEffect(() => {
-    fetchWeeklyData();
-  }, [link]);
 
   const getChartData = () => {
     const data = showAllTime ? allTimeTransactions : weeklyTransactions;

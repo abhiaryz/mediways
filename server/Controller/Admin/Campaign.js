@@ -125,7 +125,7 @@ exports.GetAllCampaigns = async (req, res, next) => {
   }
 };
 
-exports.GetCampaignDetails = async (req, res, next) => {
+exports.GetCampaignDetails = async (req, res) => {
   const { link } = req.params;
 
   try {
@@ -139,11 +139,11 @@ exports.GetCampaignDetails = async (req, res, next) => {
     startOfWeek.setHours(0, 0, 0, 0);
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
 
-    // Fetch transactions for current week
-    const transactions = await transactionModel.aggregate([
+    // Fetch weekly transactions
+    const weeklyTransactions = await transactionModel.aggregate([
       {
         $match: {
-          campaignId: campaign._id.toString(),
+          campaignId: campaign._id,
           createdAt: { $gte: startOfWeek },
           status: "success"
         }
@@ -162,7 +162,7 @@ exports.GetCampaignDetails = async (req, res, next) => {
 
     return res.status(200).json({
       campaign,
-      weeklyTransactions: transactions,
+      weeklyTransactions
     });
   } catch (error) {
     console.error("Error fetching campaign details:", error);
