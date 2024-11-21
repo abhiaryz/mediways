@@ -69,16 +69,15 @@ exports.InitiatePayment = async (req, res, next) => {
     const key = process.env.PAYU_MERCHANT_KEY;
     const salt = process.env.PAYU_SALT;
     const productinfo = "Donation";
-    const firstname = username; // Keep firstname as it is
-    const totalAmount = parseInt(amount) + parseInt(amountTip);
+    const firstname = username;
+    const totalAmount = parseInt(amount) + parseInt(amountTip || 0);
     const surl = `${process.env.BACKEND_URL}/user/payment-success`;
     const furl = `${process.env.BACKEND_URL}/user/payment-failure`;
-    const udf1 = amount;
-    const udf2 = amountTip;
 
-    // PayU hash sequence with UDF fields:
-    const hashString = `${key}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|||||||||||${salt}`;
+    // PayU hash sequence: key|txnid|amount|productinfo|firstname|email|||||||||||salt
+    const hashString = `${key}|${txnid}|${totalAmount}|${productinfo}|${firstname}|${email}|||||||||||${salt}`;
     const hash = crypto.createHash("sha512").update(hashString).digest("hex");
+
     console.log("Generated hash for payment:", hash);
 
     // Save transaction
@@ -106,11 +105,8 @@ exports.InitiatePayment = async (req, res, next) => {
       email,
       phone,
       surl,
-      salt,
       furl,
       hash,
-      udf1,
-      udf2,
     });
   } catch (error) {
     console.error("Error initiating payment:", error);
