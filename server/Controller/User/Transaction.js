@@ -146,17 +146,20 @@ exports.PaymentSuccess = async (req, res) => {
     console.log("Transaction updated to success:", transaction);
 
     // Update campaign amount
-    await campaignModel.findOneAndUpdate(
-      { _id: transaction.campaignId },
-      {
-        $inc: { amountDonated: Number(amount) },
-        $set: { lastUpdate: new Date() },
-      }
-    );
-    console.log(
-      "Campaign amount updated for campaign ID:",
-      transaction.campaignId
-    );
+    const campaign = await campaignModel.findById(transaction.campaignId);
+    if (campaign) {
+      await campaignModel.findOneAndUpdate(
+        { _id: transaction.campaignId },
+        {
+          $inc: { amountDonated: Number(amount) },
+          $set: { lastUpdate: new Date() },
+        }
+      );
+      console.log(
+        "Campaign amount updated for campaign link:",
+        campaign.link
+      );
+    }
 
     // Fetch user details from the transaction
     const user = await userModel.findById(transaction.userId);
@@ -170,8 +173,8 @@ exports.PaymentSuccess = async (req, res) => {
       txnId: txnid,
       date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
       paymentMethod: mode,
-      campaignLink: transaction.campaignId,
-      taxBenefit: transaction.campaignId.taxBenefit?.isTaxBenefit,
+      campaignLink: campaign.link, // Use campaign link instead of ID
+      taxBenefit: campaign.taxBenefit?.isTaxBenefit,
     });
 
     res.redirect(`${process.env.FRONTEND_URL}/payment-success`);
@@ -223,6 +226,8 @@ exports.PaymentFailure = async (req, res) => {
     const user = await userModel.findById(transaction.userId);
     console.log("User details fetched for payment failure:", user);
 
+    const campaign = await campaignModel.findById(transaction.campaignId);
+
     await sendPaymentEmail({
       status: "failed",
       name: user.username,
@@ -231,7 +236,7 @@ exports.PaymentFailure = async (req, res) => {
       txnId: txnid,
       date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
       errorMessage: error_Message,
-      campaignLink: transaction.campaignId,
+      campaignLink: campaign.link, // Use campaign link instead of ID
     });
 
     res.redirect(`${process.env.FRONTEND_URL}/payment-failure`);
