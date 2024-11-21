@@ -17,7 +17,19 @@ const transactionSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-
+  totalAmount: {
+    type: Number,
+    required: true,
+  },
+  amountTip: {
+    type: Number,
+  },
+  taxExemption: {
+    type: Boolean,
+  },
+  isAnonymous: {
+    type: Boolean,
+  },
   status: {
     type: String,
     enum: ["pending", "success", "failed"],

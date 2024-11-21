@@ -28,7 +28,7 @@
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
-    "start": "node api/index.js",
+    "start": "nodemon api/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
