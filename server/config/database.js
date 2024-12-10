@@ -4,7 +4,7 @@ const connectdatabase = async () => {
   try {
     // this is db from aniket mongodb account
     await mongoose.connect(
-      "mongodb+srv://ganesh:12@aidcircle.uvee4.mongodb.net/?retryWrites=true&w=majority&appName=aidcircle"
+      "mongodb+srv://ganesh:dbb52nxJyecA1u7Q@aidcircle.uvee4.mongodb.net/aidcircle?retryWrites=true&w=majority&appName=aidcircle"
     );
 
     console.log("db connection successful");
