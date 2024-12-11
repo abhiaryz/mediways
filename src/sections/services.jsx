@@ -12,7 +12,7 @@ const Services = () => {
   useEffect(() => {
     const fetchData = async () => {
       const response = await axios.get(
-        "https://mediways-server.vercel.app/user/get-all-services",
+        `${import.meta.env.VITE_SERVER_URL}/user/get-all-services`,
       );
       const firstFive = response.data.services.slice(0, 5);
       setServicesData(firstFive);

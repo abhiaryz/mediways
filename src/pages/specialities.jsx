@@ -46,7 +46,7 @@ const SpecialitiesPage = () => {
       try {
         if (link) {
           const response = await axios.get(
-            `https://mediways-server.vercel.app/user/get-speciality-details/${link}`,
+            `${import.meta.env.VITE_SERVER_URL}/user/get-speciality-details/${link}`,
           );
           await setDetailData(response.data.speciality);
         }

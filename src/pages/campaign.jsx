@@ -9,7 +9,7 @@ const Campaign = () => {
   useEffect(() => {
     const fetchData = async () => {
       const response = await axios.get(
-        "https://mediways-server.vercel.app/user/get-all-campaigns",
+        `${import.meta.env.VITE_SERVER_URL}/user/get-all-campaigns`,
       );
       setParsedData(response.data.campaigns);
     };

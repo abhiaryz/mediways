@@ -99,7 +99,7 @@ const CampaignDetails = () => {
       setIsLoading(true);
       try {
         const response = await axios.get(
-          `https://mediways-server.vercel.app/user/get-campaign-details/${link}`,
+          `${import.meta.env.VITE_SERVER_URL}/user/get-campaign-details/${link}`,
         );
         setParsedData(response.data.campaign);
       } catch (error) {

@@ -72,7 +72,7 @@ const Contact = () => {
     try {
       // eslint-disable-next-line no-unused-vars
       const response = await axios.post(
-        `https://mediways-server.vercel.app/user/submit-form`,
+        `${import.meta.env.VITE_SERVER_URL}/user/submit-form`,
         formData,
       );
 

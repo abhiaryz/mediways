@@ -19,7 +19,7 @@ import axios from "axios";
 export const callAPI = async () => {
   try {
     const response = await axios.get(
-      "https://mediways-server.vercel.app/user/get-all-specialties",
+      `${import.meta.env.VITE_SERVER_URL}/user/get-all-specialties`,
     );
     return response.data.specialities;
   } catch (error) {
